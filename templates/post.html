@@ -1,0 +1,8 @@
+<h1>{{ .Title }}</h1>
+<i>{{ .Description }}</i>
+<div class="info">
+    Posted on {{ .Date | formatDate }} by {{ .Author.FName }} {{ .Author.LName }}
+    <div class="tags">Tags: {{ .Tags | joinTags }}</div>
+</div>
+
+{{ .Body | printHTML}}

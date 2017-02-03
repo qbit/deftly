@@ -1,0 +1,100 @@
+html {
+    background-color: #f8f8f8;
+    font-size: 16px;
+    font-color: #666;
+    font-weight: 400;
+    line-height: 24px;
+}
+
+body {
+    background-color: #f8f8f8;
+    color: #666666;
+    font-size: 16px;
+    font-family: Avenir, 'Open Sans', sans-serif;
+    font-weight: 400;
+    margin: 0px auto 0px auto;
+}
+
+div#header {
+
+}
+
+div#logo a {
+    float: left;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div#header #navigation {
+    text-align: left;
+    border-right: 1px solid #f8f8f8;
+    border-bottom: 1px solid #f8f8f8;
+    box-shadow: 1px 2px 2px #f8f8f8;
+}
+
+div#header #navigation a {
+    font-size: 18px;
+    text-decoration: none;
+}
+
+div#header #navigation img {
+    height: 48px;
+    padding-top: 5px;
+}
+
+#navigation i {
+    color: #666;
+}
+
+div#footer {
+    font-size: 12px;
+    padding: 12px 0px 12px 135px;
+    text-align: left;
+    margin-right: 30px;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+div.info {
+     font-size: 14px;
+    font-style: italic;
+}
+
+pre {
+    padding-left: 5px;
+    font-size: 14px;
+    margin-left: 18px;
+    overflow: auto;
+    background-color: #ccc;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px #888;
+}
+
+code {
+    padding-left: 5px;
+    padding-right: 3px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    line-height: 1em;
+}
+
+pre code {
+    box-shadow: 0px 0px 0px #000 !important;
+}
+
+blockquote p {
+    box-shadow: 1px 1px 5px #888;
+    padding: 4px;
+    font-style: italic;
+}
+
+.tags {
+    text-decoration: italic;
+}

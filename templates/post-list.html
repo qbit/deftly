@@ -1,0 +1,9 @@
+<ul>
+    {{ range . }}
+        <li>
+            <a href="{{ .URL }}">{{ .Title }}</a> - <i>{{ .Date }}</i>
+	    <br />
+	    {{ .Description }}
+        </li>
+    {{ end }}
+</ul>

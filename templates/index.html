@@ -1,0 +1,59 @@
+{{ template "header.html" }}
+    <div id="content">
+<h1>Home</h1>
+
+Welcome to my notebook (and sometimes blog)!<br /><br />
+I try to keep this page up-to-date with the various projects I am undertaking. Projects
+are usually computer related in some way, but every now and then I require some down time
+and switch gears to something like bone carving.
+
+<h2>Recent Notes</h2>
+      <ul>
+        {{ range lop . 0 5 }}
+        <li>
+          <a href="{{ .URL }}">{{ .Title }}</a> - <i>{{ .Date | shortDate}}</i>
+          <br />
+          {{ .Description }}
+        </li>
+        {{ end }}
+       </ul>
+       <a href="/archive.html"><i>archives...</i></a>
+<h2>qbit/snap</h2>
+<p><b>snap</b> is a utility I wrote to make it a bit easier to jump to new snapshot releases
+  of OpenBSD.</p>
+<p><b>snap</b> can be verified with <a href="http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man1/signify.1?query=signify">signify(1)</a> by using the below public key:</p>
+<p>
+
+<h4>Pub key</h4>
+<pre>
+<code>
+untrusted comment: github.com/qbit/snap public key
+RWQVGN6sUjQQA5uYpANGLLKQMAERZ43otLePFSVqNFGGtf/qBez7G1WU
+</code>
+</pre>
+
+<p>
+  To verify <b>snap</b>:<br />
+  <code>signify -C -p /etc/signify/snap.pub -x SHA256.sig snap</code><br />
+</p>
+<p>
+  The above assumes that the public key listed above has been put in <i>/etc/signify/snap.pub</i>.
+</p>
+
+<h4>Old pub keys</h4>
+<pre>
+<code>
+untrusted comment: github.com/qbit/snap public key
+RWTKOAnI3kqGqY/1ungBemfzkDj4ImXuybf4sDZcCrNJywffIRDkK1qF
+</code>
+</pre>
+<pre>
+<code>
+untrusted comment: github.com/qbit/snap public key
+RWQkqrbMjoywaLwJQf45TjtCLgtFPSEO7v/TBf01WRZjvl8NSy6rJ6Fe
+</code>
+</pre>
+</p>
+
+    </div>
+{{ template "footer.html" }}

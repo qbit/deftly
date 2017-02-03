@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>pledge(2)&#39;ing Xmonad</h1>
+<i>Bringing OpenBSD&#39;s pledge(2) to Xmonad</i>
+<div class="info">
+    Posted on Sun, 06 Mar 2016 12:00:00 MST by Aaron Bieber
+    <div class="tags">Tags: OpenBSD</div>
+</div>
+
+<h2>Background</h2>
+
+<p>For those that don&rsquo;t know, <a href="http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man2/pledge.2?query=pledge&amp;arch=i386">pledge(2)</a> is an OpenBSD specific feature that allows applications to &ldquo;promise&rdquo; to use a subset of system calls. If an app has promised to only use, say, <code>rpath</code> (obviously this is a contrived example) it would only be allowed to run this subset of system calls: <code>chdir(2)</code>, <code>getcwd(3)</code>, <code>openat(2)</code>, <code>fstatat(2)</code>, <code>faccessat(2)</code>, <code>readlinkat(2)</code>, <code>lstat(2)</code>, <code>chmod(2)</code>, <code>fchmod(2)</code>, <code>fchmodat(2)</code>, <code>chflags(2)</code>, <code>chflagsat(2)</code>, <code>chown(2)</code>, <code>fchown(2)</code>, <code>fchownat(2)</code>, <code>fstat(2)</code>, <code>getfsstat(2)</code>. If the app tries to access a system call other than these, the kernel will kill the app with a SIGABRT.</p>
+
+<p>Since the addition of pledge(2) a handful of OpenBSD ports (including ghc) have added support for it! This means we can use pledge(2) in haskell apps like Xmonad!</p>
+
+<p>When you pledge an app, you need to read through and understand what it is doing so that you can properly set the promises it will use. In larger apps you can make successive calls to pledge(2) from various parts of the app, this allows you to conditionally ratchet down the required promises.</p>
+
+<p>For example, you could make an initial loose pledge of <code>stdio rpath wpath cpath proc exec unix</code>, then later remove a few calls like so: <code>stdio rpath wpath cpath unix</code>.</p>
+
+<p>The second set of promises listed above is a fairly bad example in this case, as window managers will need <code>proc</code> and <code>exec</code> to start new programs.</p>
+
+<h2>Hello Pledge!</h2>
+
+<p>Lets write an extremely limited app that can only make calls from the <code>stdio</code> set.</p>
+
+<pre><code>import System.OpenBSD.Process ( pledge )
+
+main = do
+    _ &lt;- pledge &quot;stdio&quot; Nothing
+    putStrLn &quot;Hello, World!&quot;
+</code></pre>
+
+<p>As a test, you can run with <code>tty</code> specified instead of <code>stdio</code>. ghc will be able to build the binary, but upon execution you will see something like following in dmesg:</p>
+
+<pre><code>hello(21115): syscall 92 &quot;stdio&quot;
+</code></pre>
+
+<h2>Pledged Xmonad</h2>
+
+<p>Finally on to Xmonad! Here is an extremely basic example of a <code>xmonad.hs</code> file you could use.</p>
+
+<pre><code>import XMonad
+import System.IO
+import System.OpenBSD.Process ( pledge )
+
+main = do
+    _ &lt;- pledge &quot;stdio rpath proc exec unix&quot; Nothing
+    xmonad $ defaultConfig
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

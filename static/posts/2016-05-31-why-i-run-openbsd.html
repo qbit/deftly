@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Why I Run OpenBSD</h1>
+<i>A story of how OpenBSD came to be my favorite OS.</i>
+<div class="info">
+    Posted on Tue, 31 May 2016 16:04:05 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, Linux</div>
+</div>
+
+<p>This post is about my journey down the OS rabbit hole and how it
+landed me in OpenBSD land as a happy and productive user.</p>
+
+<p>It contains information that is highly opinionated, wildly
+inaccurate, mostly speculation. It is, after all, on the internet!</p>
+
+<h3>UPI</h3>
+
+<p>One thing I learned during my travels between OSs: consistency is
+everything.</p>
+
+<p>Most operating systems seem to, at least, keep a consistent interface
+between themselves and binaries / applications. They do this by keeping
+consistent APIs (Application Programming Interfaces) and ABIs
+(Application Binary Interfaces). If you take a binary from a really old
+version of Linux and run or build it on a brand-spanking new install of
+Linux, it will likely <em>Just Work™</em>. This is great for applications
+and developers of applications. Vendors can build binaries for
+distribution and worry less about their product working when it gets
+out in the wild (sure this binary built in 2016 will run on RedHat
+AS2.1!!).</p>
+
+<p>With all this catering to applications and developers, one would think
+that a similar level of attention would be applied to the <em>users</em> of
+the applications and systems: User Program Interfaces (UPI) as I like to
+call them!</p>
+
+<p>A good example of a poor UPI is (was?) <code>ifconfig(8)</code> on Linux. From a
+user&rsquo;s perspective, <code>ifconfig</code>, a command to &ldquo;configure network
+interface parameters&rdquo; should work on&hellip; well, network interfaces!
+This includes wireless, hard-wired, cell based&hellip; etc.</p>
+
+<p>On Linux, however, this is no longer the case (at least for some devices).</p>
+
+<p>This inconsistency seems to have come to be when Linux started getting
+wireless support. For some reason someone (vendors, maybe?) decided
+that <code>ifconfig</code> wasn&rsquo;t a good place to let users interact with their
+wireless device. Maybe they felt their device was special? Maybe there
+were technical reasons? The bottom line is, someone decided to create
+a new utility to manage a wireless device&hellip; and then another one came
+along&hellip; pretty soon there was <code>iwconfig(8)</code>, <code>iw(8)</code>, <code>ifconfig(8)</code>,
+some funky thing that let windows drivers interface with Linux..  and
+one called <code>ip(8)</code> I am sure there are others I am forgetting, but I
+prefer to forget. I have moved onto greener pastures and the knowledge
+of these programs no longer serves me.</p>
+
+<p>Simply configuring a wireless network on Linux became a huge hassle:</p>
+
+<ul>
+<li><strong>User</strong>: Which tool do I use to configure my wireless? <code>ifconfig</code>
+doesn&rsquo;t seem to be able to help me.</li>
+<li><strong>Google[1]</strong>: Well it depends on what driver you are using.</li>
+<li><strong>User</strong>: Intel blablablbla.</li>
+<li><strong>Google[1] -&gt; Intel Site</strong>: <code>iwconfig</code>! The command is going to look
+very similar to <code>ifconfig</code> but don&rsquo;t let that fool you! It&rsquo;s very
+different and only works with one very specific type of wireless
+device!</li>
+</ul>
+
+<p><strong>[1]</strong> Note, the use of google here. This is very crucial, and the
+very first sign of poor UPI, if the user has to go somewhere outside
+the system to find information on the system, you have already lost.
+Your UPI sucks.</p>
+
+<h3>The Double Drill Set</h3>
+
+<p>All of this inconsistency with the wireless stuff left me with a
+dirty, uneasay feeling. Where else is this disregard for users
+manifesting? Is there no process that looks at tooling and says:
+&ldquo;Wait, these tools do very similar things from a users
+perspective. Let&rsquo;s not clutter the environment with more tools that do
+<em>almost</em> the same thing.&rdquo;</p>
+
+<p>It&rsquo;s like having two drills, one that drives screws in, and another
+that take them out.</p>
+
+<p>Maybe none of this is Linux (the kernel)&rsquo;s fault, maybe it&rsquo;s because
+userland is built over here by these people&hellip; and the kernel over
+there by those people. Perhaps it&rsquo;s the job of a distributor like
+Debian or RedHat to keep things consistent for the end user. I don&rsquo;t
+really know, but at this point, it didn&rsquo;t seem like it&rsquo;s a high
+priority for any of them.</p>
+
+<h3>Back and Forth</h3>
+
+<p>Throughout my OS travels, I have consistently gone back and forth
+between Linux and the BSDs. At least yearly, I would have FreeBSD,
+OpenBSD or NetBSD on my main system. Usually this would end after a few
+months because one tiny thing that worked in Linux was missing. Be it
+an application or a driver.</p>
+
+<p>But then something changed. I decided that I had enough of this dirty
+feeling. I was going to abandon Linux and use one of the BSDs full
+time. If something didn&rsquo;t work, I was going to fix it. If I didn&rsquo;t
+have an application I needed, I was going to port it. But I didn&rsquo;t
+know which BSD to choose. All of them had issues with at least one
+thing I needed, so all were candidates for adoption!</p>
+
+<h3>The Showdown</h3>
+
+<p>One month, one BSD. Starting with FreeBSD, then OpenBSD, then NetBSD.</p>
+
+<p>Since none of the BSDs completely worked for me, I knew it would be a
+tough journey. There would be sacrifices, there would be work that
+needed to be done.</p>
+
+<p>A few things were clear:</p>
+
+<p>1) If I found myself googling for information that the system should
+have provided, that system was not the one for me.
+2) If the system had glaring UPI violations, it wasn&rsquo;t the system for me.
+3) If system simplicity was created via overly complex mechanisms, the
+system was not for me.</p>
+
+<h3>Long Story Short</h3>
+
+<p>OpenBSD won the showdown. It was the most complete, simple, and
+coherent system. The documentation was thorough, the code was easy to
+follow and understand.</p>
+
+<p>It had one command to configure all of the network interfaces!</p>
+
+<p>I didn&rsquo;t have wireless, but I was able to find a cheap USB adapter
+that worked by simply running <code>man -k wireless</code> and reading about the
+USB entries.</p>
+
+<p>It didn&rsquo;t have some of the applications I use regularly, so I started
+reading about ports (intuitively, via <code>man ports</code>!).</p>
+
+<h3>The Test</h3>
+
+<p>Shortly after selecting OpenBSD, I switched my ISP from Comcast to
+Century Link. Early on I decided I would run my modem in &ldquo;bridge&rdquo;
+mode, and have OpenBSD doing all the PPPoE stuff. To test my metal
+(and OpenBSD&rsquo;s) I was going to configure everything without consulting
+the internet!</p>
+
+<p>Armed with ONLY OpenBSD and its excellent documentation, I was able to
+configure an OpenBSD router doing PPPoE, NAT, DNS and DHCP. All
+without installing a single thing outside of the base OS (which, I
+might add, was installed on a 2G CF card with room to spare!) and not
+a single search engine query (no internet, remember? :P)!</p>
+
+<h3>FastForward to Now</h3>
+
+<p>OpenBSD is my main OS and the only OS I truly enjoy running. With
+every release it gains new, awesome features that embody simplicity,
+security, and consistency.</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

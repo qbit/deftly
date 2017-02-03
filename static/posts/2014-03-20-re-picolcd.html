@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Revisiting the PicoLCD 256x64</h1>
+<i>Officially added the code to make picoLCD work!</i>
+<div class="info">
+    Posted on Thu, 20 Mar 2014 13:00:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD</div>
+</div>
+
+<p><img src="/images/banner1.gif" alt="OpenBSD Banner" /></p>
+
+<p>Today marks my first commits (<a href="http://www.openbsd.org/cgi-bin/cvsweb/src/sys/dev/usb/usbdevs.diff?r1=1.626;r2=1.627;f=h">1</a>, <a href="http://www.openbsd.org/cgi-bin/cvsweb/src/sys/dev/usb/usbdevs.h.diff?r1=1.638;r2=1.639;f=h">2</a>, <a href="http://www.openbsd.org/cgi-bin/cvsweb/src/sys/dev/usb/usb_quirks.c.diff?r1=1.72;r2=1.73;f=h">3</a>) to the OpenBSD <code>src</code> tree (up until now it has all bee in <code>ports</code> and one in <code>www</code>)!</p>
+
+<pre><code>add USB_PRODUCT_ITUNER_USBLCD256x64 as UQ_BAD_HID so libusb can talk via
+interrupt transfers
+
+OK sthen@
+</code></pre>
+
+<p>The last commit makes the PicoLCD 256x64 not attach as a <code>HID</code>, so that it can be used by applications that talk to usb devices with <code>libusb</code>!</p>
+
+<p>The next step is to finish up the lcdproc driver for it - currently I can only turn on or of the backlight and +,- the contrast!</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

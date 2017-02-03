@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Manual import of repos into Gogs</h1>
+<i>Manually importing very large repositories into Gogs.</i>
+<div class="info">
+    Posted on Thu, 31 Dec 2015 12:00:00 MST by Aaron Bieber
+    <div class="tags">Tags: Gogs</div>
+</div>
+
+<p>Recently I used setup a <a href="https://gogs.io/">Gogs</a> instance and attempted to pull in some very large
+repositories (OpenBSD source tree). In doing so, I reached a timeout issue during the clone operation.</p>
+
+<pre><code>    if err = git.Clone(opts.RemoteAddr, repoPath, git.CloneRepoOptions{
+            Mirror:  true,
+            Quiet:   true,
+            Timeout: 10 * time.Minute,
+    }); err != nil {
+            return repo, fmt.Errorf(&quot;Clone: %v&quot;, err)
+    }
+</code></pre>
+
+<p>The 10 minute timeout listed above was being hit. And updating the code to a larger timeout caused some new issues. So I had to make a workaround!</p>
+
+<h1>Step 1</h1>
+
+<p>Become the git user:</p>
+
+<pre><code>su - git
+</code></pre>
+
+<h1>Step 2</h1>
+
+<p>Now clone the repo into your desired user&rsquo;s repo directory. In my case, this was to be a mirror, so pass that option to git-clone(1):</p>
+
+<pre><code>git clone --mirror git@sourceurl/repo.git ~/gogs-repositories/qbit/openbsd-src.git/
+</code></pre>
+
+<h1>Step 3</h1>
+
+<p>Now we need to tell the Gogs db about the repo:</p>
+
+<pre><code>sqlite3 ./go/src/github.com/gogits/gogs/data/gogs.db
+</code></pre>
+
+<p>then:</p>
+
+<pre><code>insert into repository (
+    owner_id,
+    lower_name,
+    name,
+    description,
+    website,
+    default_branch,
+    num_watches,
+    num_stars,
+    num_forks,
+    num_issues,
+    num_closed_issues,
+    num_pulls,
+    num_closed_pulls,
+    num_milestones,
+    num_closed_milestones,
+    is_private,
+    is_bare,
+    is_mirror,
+    is_fork,
+    created,
+    updated,
+    enable_wiki,
+    enable_external_wiki,
+    enable_issues,
+    enable_external_tracker,
+    enable_pulls
+) values (
+    1,
+    'openbsd-src',
+    'openbsd-src',
+    'Mirror of sthen@s anoncvs repo',
+    '',
+    'master',
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    datetime('now'),
+    datetime('now'),
+    0,
+    0,
+    0,
+    0,
+    0
+);	
+</code></pre>
+
+<p>Obviously you will need to change the strings and <code>owner_id</code> to those that correspond to your repo&rsquo;s information. Owner ID can be queried from the <code>user</code> table.</p>
+
+<h1>Step 4</h1>
+
+<p>Now we need to tell Gogs about our repository mirror relation. To do this, you will need the ID of the repository you just created. This can be acquired by running a select on the <code>repository</code> table: <code>select * from repository</code>.</p>
+
+<p>Next update the mirror table:</p>
+
+<pre><code>insert into mirror (repo_id, interval) values (40, 2);
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

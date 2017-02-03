@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>On Shells and Static Paths</h1>
+<i>How static paths are actively harming the industry.</i>
+<div class="info">
+    Posted on Tue, 26 Apr 2016 00:00:00 UTC by Aaron Bieber
+    <div class="tags">Tags: Shell, OpenBSD</div>
+</div>
+
+<blockquote>
+<p><strong><em>In a previous post, I told people not to start their scripts with
+<code>#!/bin/bash</code>. In this post, I will explain in more detail why you
+shouldn&rsquo;t do this if you want your script to be portable!</em></strong></p>
+</blockquote>
+
+<p>Operating systems, they are neat, aren&rsquo;t they? So much diversity, so
+many options! Don&rsquo;t like the shell that comes stock on your OS because
+it doesn&rsquo;t connect to the internet, download a list of packages that
+<em>might</em> be similar to a mistyped command you haphazardly pasted into
+your terminal? Great, you can install one that does! So many options!</p>
+
+<p>With all these options available to us, how can someone settle on a
+single PATH to contain all this greatness? Why put <code>bash</code> in <code>/bin</code>?
+Why not <code>/opt/fancy/oh-bash-my-face/bin</code>?</p>
+
+<p>Well.. lets not get crazy here&hellip; That&rsquo;s clearly a terrible location
+for <code>bash</code>, no way it&rsquo;s standard!</p>
+
+<h1>Right!</h1>
+
+<p>Lets talk about a specific set of standards, <a href="http://pubs.opengroup.org/onlinepubs/7990989775/index.html">The Single UNIX®
+Specification</a>
+and <a href="http://pubs.opengroup.org/onlinepubs/9699919799/">POSIX IEEE Std 1003.1</a></p>
+
+<p>It&rsquo;s true that not all Unixie operating systems conform to these
+standards, but all of them implement enough to solve the problem of a
+given shell not being installed in <code>/bin</code>!</p>
+
+<h1>The wisdom of The Grey Ones</h1>
+
+<p>Long ago, the Great Grey Ones knew that not everyone would put things
+in <code>/bin</code>. They also knew that for a script/binary to be usefull.. it
+needed to be in your PATH environment variable! Because of this.. they
+made statements like:</p>
+
+<blockquote>
+<p>Applications should note that the standard PATH to the shell cannot
+be assumed to be either /bin/sh or /usr/bin/sh, and should be
+determined by interrogation of the PATH returned by getconf PATH,
+ensuring that the returned pathname is an absolute pathname and not a
+shell built-in.</p>
+</blockquote>
+
+<p>Both POSIX and SUS define this.</p>
+
+<p>I know what you are thinking: &ldquo;Surely this applies only to <code>sh</code>, <code>bash</code>
+is the new standard, <code>bash</code> is everywhere! Anything that doesn&rsquo;t have
+<code>bash</code> is old and therefore not used! My <code>bash</code> is in <code>/bin/bash</code> -
+yours <strong>MUST</strong> be as well!&rdquo;</p>
+
+<h2>No!</h2>
+
+<p>What if I told you, some systems like <a href="http://openbsd.org">OpenBSD</a> and
+<a href="http://freebsd.org">FreeBSD</a> do things a little differently. They have
+a clear distinction between &ldquo;base&rdquo; applications and applications that
+are installed via their respective <code>ports</code> systems.</p>
+
+<p>For various reasons, things like <code>bash</code> and <code>zsh</code> are not included in
+&ldquo;base&rdquo;. This means they will be installed outside of the typical &ldquo;/bin,
+/usr/bin&rdquo; directory structure. Which means when you put lines like:
+<code>#!/bin/bash</code> at the top of your script you are ensuring that your
+script will not run on OpenBSD or FreeBSD (or any other system that has
+<code>bash</code> installed somewhere else)!</p>
+
+<h1>Back to The Grey Ones</h1>
+
+<p>They planned for this! They gave us nifty tools that allow us to
+invoke these these shells without knowing the explicit path for said
+shell!</p>
+
+<p>Tools like <code>/usr/bin/env</code> which:</p>
+
+<blockquote>
+<p>executes utility after modifying the environment as specified on the
+command line.</p>
+</blockquote>
+
+<p>Simply calling <code>env</code> will spit out a list of all your currently set
+variables! These vars get passed to <code>utility</code> when you execute
+something like <code>env bash</code> (where <code>bash</code> is the utility).</p>
+
+<p>This means if we have our scripts execute <code>#!/usr/bin/env bash</code> as the
+first line of our script, the PATH variable will be set to something
+that is more likely to contain <code>bash</code> than an explicit declaration
+like <code>/bin/bash</code> which, as we learned, doesn&rsquo;t exist on some systems!</p>
+
+<h1>Conclusion</h1>
+
+<p>Don&rsquo;t be <strong><em>that guy</em></strong>. If your script is meant to run on a variety
+of systems, follow the advice of The Grey Ones, use something like
+<code>env</code> to make your scripts portable. I have yet to see a *NIX OS that
+lacks <code>/usr/bin/env</code>. This includes things like True64.</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

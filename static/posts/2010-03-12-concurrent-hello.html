@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Concurrent Hello with Erlang</h1>
+<i>A concurrent Hello World with Erlang</i>
+<div class="info">
+    Posted on Fri, 12 Mar 2010 12:01:00 MST by Aaron Bieber
+    <div class="tags">Tags: Erlang</div>
+</div>
+
+<p>I recently picked up a copy of Joe Armstrong’s superb Programming Erlang book ( from the folks @ pragprog.com ). While reading the chapter on concurrent programming I was completely stumped by one of the examples. It basically creates a “server” and “client” and allows for message passing between the two. I found it very difficult to follow the passing of messages from a to b, and back.</p>
+
+<p>Enter <code>chello.erl</code>! I created a slightly modified version of Joe’s example that uses some <code>io:format</code> to tell you what’s going on. Hope someone finds this useful.</p>
+
+<pre><code class="language-erlang">-module (chello).
+-export ([loop/0, rpc/2]).
+
+rpc(Pid, Request) -&gt;
+    io:format(&quot;rpc[~p]  sending ~p to ~p~n&quot;, [self(), Request, Pid]),
+    Pid ! {self(), Request},
+    receive
+        Response -&gt;
+            io:format(&quot;rpc[~p]  responding with : ~p~n&quot;, [self(), Response]),
+            {Pid,Response}
+    end.
+
+loop() -&gt;
+receive
+    {From, {hello}} -&gt;
+        io:format(&quot;loop[~p] received info from: ~p~n&quot;, [self(), From]),
+        From ! {self(), &quot;Hello&quot;},
+        loop();
+    {From, {goodbye}} -&gt;
+        io:format(&quot;loop[~p] received info from: ~p~n&quot;, [self(), From]),
+        From ! {self(),&quot;Goodbye&quot;},
+        loop();
+    {From, Other} -&gt;
+        io:format(&quot;loop[~p] received info from: ~p~n&quot;, [self, From]),
+        From ! {self(),{error, Other}},
+        loop()
+    end.
+</code></pre>
+
+<p>Run from the erl shell with:</p>
+
+<pre><code>1&gt; Pid = spawn(fun chello:loop/0).
+
+&lt;0.38.0&gt;
+
+2&gt; chello:rpc(Pid, {hello}).
+rpc[&lt;0.31.0&gt;] sending {hello} to &lt;0.38.0&gt;
+
+loop[&lt;0.38.0&gt;] received info from: &lt;0.31.0&gt;
+
+rpc[&lt;0.31.0&gt;] responding with : {&lt;0.38.0&gt;,”Hello”}
+
+{&lt;0.38.0&gt;,{&lt;0.38.0&gt;,”Hello”}}
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

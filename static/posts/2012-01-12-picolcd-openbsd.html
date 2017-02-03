@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Deftly.net - </title>
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Using a picoLCD 256×64 on OpenBSD 4.7</h1>
+<i>Bit of hacking to get the picoLCD working on OpenBSD</i>
+<div class="info">
+    Posted on Thu, 12 Jan 2012 12:00:00 MST by Aaron Bieber
+    <div class="tags">Tags: OpenBSD</div>
+</div>
+
+<p>The first thing you will notice if you connect your fancy picoLCD 256×64 to your OpenBSD box, is that it shows up as a Human Interface Device.</p>
+
+<p>Unfortunately libusb doesn’t know what to do with devices on bsd systems that are NOT using the <strong>ugen</strong> driver:</p>
+
+<pre><code> 464     if (strncmp(di.udi_devnames[0], &quot;ugen&quot;, 4) != 0)
+ 465       /* best not to play with things we don't understand */
+ 466       continue;
+</code></pre>
+
+<p>Fine libusb!  We will have to come up with another way to use this screen!  OR!  We could tell OpenBSD to use ugen when ever it sees the lcd! :D</p>
+
+<p>To do that – you need the the OpenBSD source, knowledge of how to build Open’s kernel, and my patch!  Getting the source is beyond the scope of this little post.. so you will have to rtfm that action.</p>
+
+<ol>
+<li>cd to the usb source directory: cd /usr/src/sys/dev/usb</li>
+<li>Download the patch ( md5: 85e7498826635c612ede672f5e295e7a ): <a href="http://qbit.devio.us/picoLCD256x64.patch">picoLCD256x64.patch</a></li>
+<li>Apply said patch: patch -p1 &lt; picoLCD256x64.patch</li>
+<li>pkg_add libusb</li>
+<li>Compile your kernel, install and reboot!</li>
+<li>Once you are running your freshly compiled kernel, download the lcd4linux-256×64 source from <a href="http://picolcd.com/drivers/">http://picolcd.com/drivers/</a> .  Apply this patch ( md5: 3852103e3e5a13a3cd6b0c49389688f6 ): <a href="http://qbit.devio.us/lcd4linux-256x64.patch">lcd4linux-256×64.patch</a>, compile ( You will have to play around with the plugins as some of them use linux’s proc fs and are not compatible with OpenBSD ).</li>
+</ol>
+
+<p>Now check out the sample config files and have fun!</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: 0x1F81112D62A9ADCE / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+
