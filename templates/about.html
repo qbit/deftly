@@ -1,7 +1,7 @@
-{{ template "header.html" }}
+{{ template "header.html" . }}
 <div id="content">
 <h1>About</h1>
-<i>All about {{ .FName }}</i>
+<i>All about {{ .Author.FName }}</i>
 <div class="figure">
 <img src="https://www.gravatar.com/avatar/f52f6d73bc0ef7c3920b9bdeafb29182">
 </div>

@@ -1,4 +1,4 @@
-{{ template "header.html" }}
+{{ template "header.html" . }}
     <div id="content">
 <h1>Home</h1>
 
@@ -9,7 +9,7 @@ and switch gears to something like bone carving.
 
 <h2>Recent Notes</h2>
       <ul>
-        {{ range lop . 0 5 }}
+        {{ range lop .Posts 0 5 }}
         <li>
           <a href="{{ .URL }}">{{ .Title }}</a> - <i>{{ .Date | shortDate}}</i>
           <br />

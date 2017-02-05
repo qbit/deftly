@@ -1,9 +1,9 @@
-{{ template "header.html" }}
+{{ template "header.html" . }}
     <div id="content">
       <h1>Archived Posts</h1>
       <p>Here you can find all my previous posts:</p>
 <ul>
-    {{ range . }}
+    {{ range .Posts }}
         <li>
             <a href="{{ .URL }}">{{ .Title }}</a> - <i>{{ .Date | shortDate }}</i>
             <br />

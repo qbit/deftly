@@ -3,7 +3,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Deftly.net - {{ .Content.Title }}</title>
+    {{ $title := hasTitle .Title }} 
+    {{ if $title }} 
+    <title>Deftly.net - {{ .Title }}</title>
+    {{ else }} 
+    <title>Deftly.net</title>
+    {{ end }} 
     <link rel="stylesheet" type="text/css" href="/css/default.css" />
     <link rel="stylesheet" type="text/css" href="/css/layout.css" />
     <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
@@ -22,6 +27,7 @@
         <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
         <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
         <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" /></a>
 
       </div>
 
