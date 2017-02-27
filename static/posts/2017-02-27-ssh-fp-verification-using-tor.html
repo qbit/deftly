@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - SSH Fingerprint Verification via Tor</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>SSH Fingerprint Verification via Tor</h1>
+<i>Using Tor to validate SSH fingerprints.</i>
+<div class="info">
+    Posted on Mon, 27 Feb 2017 09:30:00 MST by Aaron Bieber
+    <div class="tags">Tags: SSH, Tor</div>
+</div>
+
+<h1>The Problem</h1>
+
+<p>OpenSSH (really, are there any other implementations?) requires <a href="https://en.wikipedia.org/wiki/Trust_on_first_use">Trust
+on First Use</a> for
+fingerprint verification.</p>
+
+<p>Verification can be especially problematic when using remote services
+like VPS or colocation.</p>
+
+<p>How can you trust that the initial connection isn&rsquo;t being <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">Man In The
+Middle&rsquo;d</a>?</p>
+
+<h1>My Solution</h1>
+
+<p>.. for remote hosts, is to use Tor as supplemental
+verification. Fortunately OpenSSH makes this very easy as connections
+can be proxied (<code>ProxyCommand</code>) via arbitrary commands (<code>socat</code> in
+this case).</p>
+
+<pre><code>#!/bin/sh
+
+# To make use of this, you need:
+# - Tor installed / running
+# - socat installed
+# - Line 1 of your ~/.ssh/config should have: 'Include ~/.ssh/torify'
+
+if [ $# -lt 1 ];then
+        echo &quot;Please specify hostname to check!&quot;
+        exit 1;
+fi
+
+TFILE=~/.ssh/torify
+HOST=$1
+
+CONF=$(cat &lt;&lt;'EOF'
+Host *
+        ProxyCommand socat STDIO SOCKS4A:localhost:%h:%p,socksport=9050
+EOF
+);
+
+echo &quot;$CONF&quot; &gt; &quot;${TFILE}&quot;
+IP=$(tor-resolve &quot;${HOST}&quot;)
+for i in 1 2 3 4 5; do
+        ssh &quot;${IP}&quot; &amp; sleep 3; kill $!
+done
+
+echo &quot;&quot; &gt; &quot;${TFILE}&quot;
+ssh &quot;$HOST&quot; &amp; sleep 3; kill $!
+</code></pre>
+
+<p><em>Latest version of this script can be pulled from
+<a href="https://github.com/qbit/dotfiles/blob/master/bin/verify_ssh_fp">here</a></em></p>
+
+<p>The above script makes five cut-short ssh connections (waiting 3
+seconds before cutting the connection by killing the ssh pid) to an IP
+address that is resolved using Tor. It then makes a single non-Tor&rsquo;d
+cut-short connection to print the fingerprint as seen from your
+default outbound connection.</p>
+
+<p>If all six of the output fingerprints match, it&rsquo;s a bit more safe to
+assume that your connection to the remote host isn&rsquo;t being tampered
+with!</p>
+
+<p>Obviously, this solution isn&rsquo;t 100%. Your Tor connection could be
+compromised.. Snakes could be on planes&hellip; etc. So use it at your own risk.</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+

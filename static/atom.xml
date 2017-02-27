@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
   <title>deftly.net - All posts</title>
   <id>https://deftly.net/</id>
-  <updated>2016-05-31T16:04:05-06:00</updated>
+  <updated>2017-02-27T09:30:00-07:00</updated>
   <rights>This work is copyright © Aaron Bieber</rights>
   <subtitle>Personal blog of Aaron Bieber</subtitle>
   <link href="https://deftly.net/"></link>
@@ -9,6 +9,17 @@
     <name>Aaron Bieber</name>
     <email>aaron@bolddaemon.com</email>
   </author>
+  <entry>
+    <title>SSH Fingerprint Verification via Tor</title>
+    <updated>2017-02-27T09:30:00-07:00</updated>
+    <id>tag:deftly.net,2017-02-27:/posts/2017-02-27-ssh-fp-verification-using-tor.html</id>
+    <content type="html">&lt;h1&gt;The Problem&lt;/h1&gt;&#xA;&#xA;&lt;p&gt;OpenSSH (really, are there any other implementations?) requires &lt;a href=&#34;https://en.wikipedia.org/wiki/Trust_on_first_use&#34;&gt;Trust&#xA;on First Use&lt;/a&gt; for&#xA;fingerprint verification.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;Verification can be especially problematic when using remote services&#xA;like VPS or colocation.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;How can you trust that the initial connection isn&amp;rsquo;t being &lt;a href=&#34;https://en.wikipedia.org/wiki/Man-in-the-middle_attack&#34;&gt;Man In The&#xA;Middle&amp;rsquo;d&lt;/a&gt;?&lt;/p&gt;&#xA;&#xA;&lt;h1&gt;My Solution&lt;/h1&gt;&#xA;&#xA;&lt;p&gt;.. for remote hosts, is to use Tor as supplemental&#xA;verification. Fortunately OpenSSH makes this very easy as connections&#xA;can be proxied (&lt;code&gt;ProxyCommand&lt;/code&gt;) via arbitrary commands (&lt;code&gt;socat&lt;/code&gt; in&#xA;this case).&lt;/p&gt;&#xA;&#xA;&lt;pre&gt;&lt;code&gt;#!/bin/sh&#xA;&#xA;# To make use of this, you need:&#xA;# - Tor installed / running&#xA;# - socat installed&#xA;# - Line 1 of your ~/.ssh/config should have: &#39;Include ~/.ssh/torify&#39;&#xA;&#xA;if [ $# -lt 1 ];then&#xA;        echo &amp;quot;Please specify hostname to check!&amp;quot;&#xA;        exit 1;&#xA;fi&#xA;&#xA;TFILE=~/.ssh/torify&#xA;HOST=$1&#xA;&#xA;CONF=$(cat &amp;lt;&amp;lt;&#39;EOF&#39;&#xA;Host *&#xA;        ProxyCommand socat STDIO SOCKS4A:localhost:%h:%p,socksport=9050&#xA;EOF&#xA;);&#xA;&#xA;echo &amp;quot;$CONF&amp;quot; &amp;gt; &amp;quot;${TFILE}&amp;quot;&#xA;IP=$(tor-resolve &amp;quot;${HOST}&amp;quot;)&#xA;for i in 1 2 3 4 5; do&#xA;        ssh &amp;quot;${IP}&amp;quot; &amp;amp; sleep 3; kill $!&#xA;done&#xA;&#xA;echo &amp;quot;&amp;quot; &amp;gt; &amp;quot;${TFILE}&amp;quot;&#xA;ssh &amp;quot;$HOST&amp;quot; &amp;amp; sleep 3; kill $!&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&#xA;&lt;p&gt;&lt;em&gt;Latest version of this script can be pulled from&#xA;&lt;a href=&#34;https://github.com/qbit/dotfiles/blob/master/bin/verify_ssh_fp&#34;&gt;here&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;&#xA;&#xA;&lt;p&gt;The above script makes five cut-short ssh connections (waiting 3&#xA;seconds before cutting the connection by killing the ssh pid) to an IP&#xA;address that is resolved using Tor. It then makes a single non-Tor&amp;rsquo;d&#xA;cut-short connection to print the fingerprint as seen from your&#xA;default outbound connection.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;If all six of the output fingerprints match, it&amp;rsquo;s a bit more safe to&#xA;assume that your connection to the remote host isn&amp;rsquo;t being tampered&#xA;with!&lt;/p&gt;&#xA;&#xA;&lt;p&gt;Obviously, this solution isn&amp;rsquo;t 100%. Your Tor connection could be&#xA;compromised.. Snakes could be on planes&amp;hellip; etc. So use it at your own risk.&lt;/p&gt;&#xA;</content>
+    <link href="https://deftly.net/posts/2017-02-27-ssh-fp-verification-using-tor.html"></link>
+    <author>
+      <name>Aaron Bieber</name>
+      <email>aaron@bolddaemon.com</email>
+    </author>
+  </entry>
   <entry>
     <title>Why I Run OpenBSD</title>
     <updated>2016-05-31T16:04:05-06:00</updated>
