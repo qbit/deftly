@@ -97,3 +97,10 @@ blockquote p {
 .tags {
     text-decoration: italic;
 }
+
+table {border-collapse:collapse}
+tbody tr:hover {background-color:#fbf6d9}
+thead tr {background-color:#f1f1f1}
+tbody tr {border-bottom:2px solid #f1f1f1}
+td, th {padding: 5px; vertical-align:top}
+thead th {vertical-align:bottom}
