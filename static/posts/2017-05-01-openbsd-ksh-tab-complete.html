@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - Tab completion in OpenBSD&#39;s ksh</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Tab completion in OpenBSD&#39;s ksh</h1>
+<i>How did I not know about this until now!?</i>
+<div class="info">
+    Posted on Mon, 01 May 2017 18:18:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, ksh</div>
+</div>
+
+<h1>OpenBSD&rsquo;s ksh</h1>
+
+<p>..is the little shell that could. In ~20k lines of code, it has many
+of the same features as more popular shells like zsh and bash. Plus it
+has the added bonus of being <a href="http://man.openbsd.org/pledge">pledge(2)&rsquo;d</a>!</p>
+
+<p>One of the features OpenBSD&rsquo;s ksh shares with its more popular
+friends is user definable completions! Something that sets it apart,
+however, is the simplicity of these completions. From the man page:</p>
+
+<pre><code>Custom completions may be configured by creating an array named
+‘complete_command’, optionally suffixed with an argument number
+to complete only for a single argument.
+</code></pre>
+
+<p>For example, here is a completion for
+<a href="http://man.openbsd.org/vmctl">vmctl(8)</a> with expansion of defined VM
+names:</p>
+
+<pre><code># vmctl
+set -A complete_vmctl -- console load reload start stop reset status
+set -A complete_vmctl_2 -- $(vmctl status | awk '!/NAME/{print $NF}')
+</code></pre>
+
+<p>Hats off to Nicholas Marriott nicm@ for implementing it and to
+brynet@ for pointing it out to me! I was close to switching to
+<a href="https://fishshell.org">fish</a> in an attempt to save my wrists.. but
+the ~180k lines of extra (yeah, on top of the 20k!) code in fish was
+kinda scaring me!</p>
+
+<p>For anyone interested, here is a quick comparison of CLOC for a few
+popular shells:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Shell</th>
+<th align="left">Version</th>
+<th align="right">Total Lines (cloc)</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">ksh</td>
+<td align="left">Mon May  1 07:17:54 UTC 2017</td>
+<td align="right">19680</td>
+</tr>
+
+<tr>
+<td align="left">zsh</td>
+<td align="left">5.3.1</td>
+<td align="right">127246</td>
+</tr>
+
+<tr>
+<td align="left">fish</td>
+<td align="left">2.5.0</td>
+<td align="right">207597</td>
+</tr>
+
+<tr>
+<td align="left">bash</td>
+<td align="left">4.4</td>
+<td align="right">351043</td>
+</tr>
+</tbody>
+</table>
+
+<p>I understand LOC isn&rsquo;t a good measure of quality, but it sure does
+mean you have a lot more reading to find that quality!</p>
+
+<p>A full list of my completions can be found <a href="https://github.com/qbit/dotfiles/blob/master/common/dot_ksh_completions">here</a>!</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+
