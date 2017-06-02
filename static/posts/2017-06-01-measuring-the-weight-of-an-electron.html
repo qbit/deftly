@@ -1,0 +1,471 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - Measuring the weight of an electron</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Measuring the weight of an electron</h1>
+<i>Electron&#39;s are small, should be easy. Right?!</i>
+<div class="info">
+    Posted on Thu, 01 Jun 2017 08:18:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, Electron, Software</div>
+</div>
+
+<p>I am going to &ldquo;<strong>Measure the weight of an electron</strong>&rdquo;! By &ldquo;weight&rdquo;, I
+mean what it takes to make
+<a href="https://github.com/electron/electron">Electron</a> work on OpenBSD.</p>
+
+<p><em>This is a long rant. A rant intended to document lunacy,
+ hopefully aid others in the future and make myself fell better about
+ something I think is crazy. It may seem like I am making an enemy of electron,
+ but keep in mind that isn&rsquo;t my intention! The enemy here, is complexity!</em></p>
+
+<p>My friend Henry, a canary, is coming along for the ride!</p>
+
+<h1>Getting the tools</h1>
+
+<p>At first glance Electron seems like a pretty solid app, it has decent
+<a href="https://github.com/electron/electron/tree/master/docs">docs</a>, it&rsquo;s
+consolidated in a single repository, has a lot of
+<a href="https://github.com/electron/electron/stargazers">visibility</a>, porting
+it shouldn&rsquo;t be a big deal, right?</p>
+
+<p>First things first, clone that repo!</p>
+
+<pre><code>git clone git@github.com:electron/electron.git
+</code></pre>
+
+<p>If you want to follow along, we will be using the <a href="https://github.com/electron/electron/blob/master/docs/development/build-instructions-linux.md">build instructions
+for
+linux</a>
+doc.</p>
+
+<p>Reading through the doc, right off the bat there are a few interesting
+things:</p>
+
+<ul>
+<li>At least 25GB disk space</li>
+</ul>
+
+<p>Huh, OK, some how this ~47M repository is going to blow up to 25G? <strong><em>I
+glance at Henry, he gives me the &ldquo;what?&rdquo; look. We carry on.</em></strong></p>
+
+<ul>
+<li>Clang 3.4 or later.</li>
+</ul>
+
+<p>This one isn&rsquo;t odd until we have more context. <em>More on this one later.</em></p>
+
+<p>Continuing along with the build, I know I have two versions of <code>clang</code>
+installed on OpenBSD, one from ports and one in base. Hopefully I will
+be able to tell the build to use one of these versions.</p>
+
+<p>Indeed Electron has that
+<a href="https://github.com/electron/electron/blob/master/docs/development/build-instructions-linux.md#using-system-clang-instead-of-downloaded-clang-binaries">ability</a>!
+Their example is even using the same prefix OpenBSD&rsquo;s clang port!</p>
+
+<p><strong>So, we run the bootstrap:</strong></p>
+
+<pre><code>./script/bootstrap.py -v --clang_dir /usr/local
+Traceback (most recent call last):
+  File &quot;./script/bootstrap.py&quot;, line 10, in &lt;module&gt;
+    from lib.config import BASE_URL, PLATFORM,  enable_verbose_mode, \
+  File &quot;/home/qbit/dev/electron_wut/script/lib/config.py&quot;, line 17, in &lt;module&gt;
+    }[sys.platform]
+KeyError: 'openbsd6'
+</code></pre>
+
+<p>Dang. Looks like we need to tell bootstrap about OpenBSD. Easy enough:</p>
+
+<pre><code>diff --git a/script/lib/config.py b/script/lib/config.py
+index 58f467b5b..646af08f7 100644
+--- a/script/lib/config.py
++++ b/script/lib/config.py
+@@ -14,6 +14,7 @@ PLATFORM = {
+   'darwin': 'darwin',
+   'linux2': 'linux',
+   'win32': 'win32',
++  'openbsd6': 'openbsd',
+ }[sys.platform]
+
+ verbose_mode = False
+</code></pre>
+
+<p>We re-run the bootstrap, things seem to be going well.. <strong><em>Then the
+ Henry squeaks: &ldquo;whoa!!&rdquo;</em></strong>:</p>
+
+<pre><code>Synchronizing submodule url for 'vendor/requests'
+git submodule update --init --recursive
+Cloning into '/home/qbit/dev/electron_wut/vendor/boto'...
+error: object c1eddff4ee3f62b6039f1083651b9118883e7f07: badTimezone: invalid author/committer line - bad time zone
+fatal: Error in object
+fatal: index-pack failed
+fatal: clone of 'https://github.com/boto/boto.git' into submodule path '/home/qbit/dev/electron_wut/vendor/boto' failed
+Failed to clone 'vendor/boto'. Retry scheduled
+Cloning into '/home/qbit/dev/electron_wut/vendor/breakpad'...
+
+</code></pre>
+
+<p>We just failed to clone the <code>boto</code> repo, but the build is still
+going.. does this mean it was an optional dependency and isn&rsquo;t needed
+for the build?</p>
+
+<p><strong><em>Henry doesn&rsquo;t look happy, none the less, he assures me it&rsquo;s OK to go
+ on. What a trooper!</em></strong></p>
+
+<pre><code>Cloning into '/home/qbit/dev/electron_wut/vendor/requests'...
+error: object 5e6ecdad9f69b1ff789a17733b8edc6fd7091bd8: badTimezone: invalid author/committer line - bad time zone
+fatal: Error in object
+fatal: index-pack failed
+fatal: clone of 'https://github.com/kennethreitz/requests' into submodule path '/home/qbit/dev/electron_wut/vendor/requests' failed
+Failed to clone 'vendor/requests'. Retry scheduled
+Cloning into '/home/qbit/dev/electron_wut/vendor/boto'...
+error: object c1eddff4ee3f62b6039f1083651b9118883e7f07: badTimezone: invalid author/committer line - bad time zone
+fatal: Error in object
+fatal: index-pack failed
+fatal: clone of 'https://github.com/boto/boto.git' into submodule path '/home/qbit/dev/electron_wut/vendor/boto' failed
+Failed to clone 'vendor/boto' a second time, aborting
+</code></pre>
+
+<p>Wait. Another repository failed to clone? At least this time the build
+failed after trying to clone <code>boto</code>.. again. I am guessing it tried
+twice because something might have changed between now and the last
+clone? <strong><em>Off in the distance we catch a familiar tune, it almost sounds
+like Gnarls Barkley&rsquo;s song Crazy, can&rsquo;t tell for sure.</em></strong></p>
+
+<p>As it turns out, if you are using
+<a href="https://git-scm.com/docs/git-fsck">git-fsck</a>, you are unable to
+clone <a href="https://github.com/boto/boto/issues/3507">boto</a> and
+<a href="https://github.com/requests/requests/issues/3805">requests</a>. Obviously
+the proper fix for his is to not care about the validity of the git
+objects!</p>
+
+<p>So we die a little inside and comment out <code>fsckobjects</code> in our
+<code>~/.gitconfig</code>.</p>
+
+<p><strong><em>I look at Henry, he assures me it&rsquo;s safe to go on.</em></strong></p>
+
+<p>We re-run bootstrap&hellip; thousands of lines fly past.. &ldquo;<code>npm
+verb... something something</code>&rdquo;. I can only think npm is puking this
+info for it&rsquo;s on benefit. It definitely isn&rsquo;t for ours!</p>
+
+<p>Bah, another error:</p>
+
+<pre><code>subprocess.CalledProcessError: Command '['/usr/local/bin/python', '/home/qbit/dev/electron_wut/vendor/libchromiumcontent/script/download', '-s', '-f', '-c', '94c58176db175d72d88621afe8223b4175eecba5', '--target_arch', 'x64', 'https://s3.amazonaws.com/github-janky-artifacts/libchromiumcontent', '/home/qbit/dev/electron_wut/vendor/download/libchromiumcontent']' returned non-zero exit status 1
+</code></pre>
+
+<p>Looks like it&rsquo;s trying to download a pre-built <code>libchromiumcontent</code>,
+we reference the doc again, finding the <code>--build_libchromiumcontent</code>
+option. Re-run!</p>
+
+<p>This time we are faced with <code>.</code>&rsquo;s, I have no idea what is happening:</p>
+
+<pre><code>/usr/local/bin/python /home/qbit/dev/electron_wut/vendor/libchromiumcontent/script/update -t x64 --defines  make_clang_dir=/usr/local clang_use_chrome_plugins=0
+.......
+</code></pre>
+
+<p>Looking in <code>top</code>, we can see a python process with a WAIT of <code>netio</code>,
+maybe it&rsquo;s downloading something? Looking in the <code>electron_wut</code>
+directory reveals a growing file named
+<code>chromium-58.0.3029.110.tar.xz</code>. We let it finish downloading.</p>
+
+<p>Out of curiosity we look at <code>vendor/libchromiumcontent/script/update</code>,
+it seems its purpose is to download / extract chromium clang and node,
+good thing we already specified <code>--clang_dir</code> or it might try to build
+clang again!</p>
+
+<p>544 dots and 45 minutes later, we have an error! The
+<code>chromium-58.0.3029.110.tar.xz</code> file is mysteriously not there
+anymore.. Interesting.</p>
+
+<p>Scrolling up in the terminal points us to something disheartening:</p>
+
+<pre><code>Extracting...
+Updating Clang to 296320-1...
+Creating directory /home/qbit/dev/electron_wut/vendor/libchromiumcontent/src/third_party/llvm-build
+Traceback (most recent call last):
+File &quot;/home/qbit/dev/electron_wut/vendor/libchromiumcontent/src/tools/clang/scripts/update.py&quot;, line 902, in &lt;module&gt;
+    sys.exit(main())
+    File &quot;/home/qbit/dev/electron_wut/vendor/libchromiumcontent/src/tools/clang/scripts/update.py&quot;, line 898, in main return UpdateClang(args)
+    File &quot;/home/qbit/dev/electron_wut/vendor/libchromiumcontent/src/tools/clang/scripts/update.py&quot;, line 420, in UpdateClangi assert sys.platform.startswith('linux')
+AssertionError
+None
+</code></pre>
+
+<p>Wut. &ldquo;<strong>Updating Clang&hellip;</strong>&rdquo;. Didn&rsquo;t I explicitly say <strong><em>not</em></strong> to
+build clang?</p>
+
+<p>At this point we have to shift projects, no longer are we working on
+Electron.. It&rsquo;s <code>libchromiumcontent</code> that needs our attention.</p>
+
+<h1>Fixing sub-tools</h1>
+
+<pre><code>git clone git@github.com:electron/libchromiumcontent.git
+</code></pre>
+
+<p>Following the
+<a href="https://github.com/electron/libchromiumcontent">instructions</a> on this
+repo, we run <code>script/bootstrap</code>.. it seems to complete without issue!</p>
+
+<p>On to the next steps:</p>
+
+<pre><code>script/update -t x64
+</code></pre>
+
+<p>Ahh, our old friends the dots! This is the second time waiting 45+
+minutes for a 500+ MB file to download. We are fairly confident it
+will fail, delete the file out from under itself and hinder the
+process even further, so we add an explicit exit to the <code>update</code>
+script. This way we can copy the file somewhere safe!</p>
+
+<pre><code>diff --git a/script/update b/script/update
+index 234e4b3..b2639bf 100755
+--- a/script/update
++++ b/script/update
+@@ -107,6 +107,7 @@ def download_source_tarball(version):
+         sys.stderr.flush()
+         t.write(chunk)
+
++  sys.exit()
+   sys.stderr.write('\nExtracting...\n')
+   sys.stderr.flush()
+</code></pre>
+
+<p>544 dots and 43 minutes later&hellip;. <code>chromium-58.0.3029.110.tar.xz</code> is
+safe!</p>
+
+<p>Fool me once&hellip;</p>
+
+<pre><code>mkdir safe_space
+cp chromium-58.0.3029.110.tar.xz safe_space/
+</code></pre>
+
+<p>We remove the <code>sys.exit()</code> and re-run! Wut.. dots again!? Lets look
+deeper into this <code>update</code> script:</p>
+
+<pre><code>if not args.no_download:
+  version = chromium_version()
+  if not is_source_tarball_updated(version):
+    download_source_tarball(version)
+else:
+  print &quot;Skipping Chromium Source Tarball Download&quot;
+
+</code></pre>
+
+<p>Ok, lets try that.. We copy the tar.xz out of its safe_space&hellip;</p>
+
+<pre><code>Skipping Chromium Source Tarball Download                                                                                                                                            
+Traceback (most recent call last):                                                          
+  File &quot;/home/qbit/dev/libchromiumcontent/vendor/python-patch/patch.py&quot;, line 1136, in &lt;module&gt;                                                                                      
+    patch.apply(options.strip, root=options.directory) or sys.exit(-1)                     
+  File &quot;/home/qbit/dev/libchromiumcontent/vendor/python-patch/patch.py&quot;, line 778, in apply
+    os.chdir(root)                                                                     
+OSError: [Errno 2] No such file or directory: '/home/qbit/dev/libchromiumcontent/src/.'
+</code></pre>
+
+<p>Sigh. The above (or similar) was repeated about 50 times&hellip; The trend
+here seems to be: <strong>Ignore errors! They are stupid and meaningless
+anyway!</strong></p>
+
+<p>Since <code>def download_source_tarball</code> should actually be <code>def
+download_source_tarball_then_extract</code>, we do that part for
+it&hellip; and pat ourselves on the back for having a <code>safe_space</code>!</p>
+
+<p><strong><em>As chromium extracts, Henry and I can&rsquo;t shake the feeling that
+ everything until now was just the tip of the iceberg</em></strong></p>
+
+<p>We remove the call to <code>update_clang</code>, because.. well.. we have two
+copies of it already and the Elctron doc said everything would be fine
+if we had &gt;= clang 3.4!</p>
+
+<p>Re-run..</p>
+
+<pre><code>already patched  third_party/WebKit/Source/core/paint/ThemePainterMac.mm
+already patched  third_party/WebKit/Source/platform/mac/KillRingMac.mm
+qbit@slip[1]:libchromiumcontent[master *%=]λ
+</code></pre>
+
+<p>That <code>[1]</code> in my PS1 means that the update script exited with the
+return code <code>1</code>&hellip; but there is no indication of why..</p>
+
+<p><strong><em>Henry&rsquo;s lovely yellow plumage seems to be becoming a darker shade of
+ yellow.. How much more of this can we take?!</em></strong></p>
+
+<p>If we have learned anything so far, it has to be &ldquo;errors don&rsquo;t matter!&rdquo;.
+This one, however, warrants further investigation!</p>
+
+<p><strong>We dig deeper into script/update</strong></p>
+
+<p><code>update_gn()</code>.. pulls down a binary <code>gn</code>.. which, interestingly can
+be generated with the code we have right below our feet&hellip; but for
+some reason, they have this component already built. There is no
+pre-built version for OpenBSD.</p>
+
+<p>At this point, Henry and I are getting pretty irritated.. it&rsquo;s time to
+bring in some big guns! We are going to leverage the countless hours
+of work that have already been put into properly building these
+components! (novel, right?!)</p>
+
+<p>We quickly move to <code>/usr/ports/www/chromium</code>, low and behold, it&rsquo;s the
+<em>exact</em> version that <code>libchromiumcontent</code> is trying to build! We
+review the <code>Makefile</code> to find this gem: <code>2. bootstrap gn, the tool to
+generate ninja files</code></p>
+
+<p>Running <code>make configure</code> quickly gets us a usable <code>gn</code> binary, we make
+the appropriate directories under src/buildtools, copy <code>gn</code> in, modify
+our <code>script/update</code> file:</p>
+
+<pre><code>diff --git a/script/update b/script/update
+index 234e4b3..b5c4afc 100755
+--- a/script/update
++++ b/script/update
+@@ -52,9 +52,9 @@ def main():
+ 
+   return (apply_patches() or
+           copy_chromiumcontent_files() or
+-          update_clang() or
+-          update_gn() or
+-          update_node() or
++          #update_clang() or
++          #update_gn() or
++          #update_node() or
+           run_gn(target_arch, args.defines))
+ 
+ 
+@@ -248,6 +248,8 @@ def run_gn(target_arch, defines):
+     gn = os.path.join(SRC_DIR, 'buildtools', 'linux64', 'gn')
+   elif sys.platform == 'darwin':
+     gn = os.path.join(SRC_DIR, 'buildtools', 'mac', 'gn')
++  elif sys.platform == 'openbsd6':
++    gn = os.path.join(SRC_DIR, 'buildtools', 'openbsd', 'gn')
+ 
+   env = os.environ.copy()
+   if sys.platform in ['win32', 'cygwin']:
+</code></pre>
+
+<p>Re-run!</p>
+
+<pre><code>ERROR at //build/config/sysroot.gni:95:5: Assertion failed.
+    assert(
+    ^-----
+Missing sysroot (//build/linux/debian_wheezy_amd64-sysroot). To fix, run: build/linux/sysroot_scripts/install-sysroot.py --arch=amd64
+See //build/config/sysroot.gni:96:9: 
+        exec_script(&quot;//build/dir_exists.py&quot;,
+        ^-----------------------------------
+</code></pre>
+
+<p>Wheezy?! Where is that getting set?! <strong><em>We stop and ponder.. how the
+hell did we get here? What could have possibly warranted abandoning
+makefiles and shell scripts in favor of this monstrosity!?</em></strong></p>
+
+<p>Just for fun..  lets try to run the second step (after all, the first
+step only produced a <code>1</code>, right!?)</p>
+
+<pre><code>script/build -t x64
+</code></pre>
+
+<p>FML:</p>
+
+<pre><code>qbit@slip[1]:libchromiumcontent[master *%=]λ script/build -t x64
+Unsupported OS OpenBSD
+No prebuilt ninja binary was found for this system.
+Try building your own binary by doing:
+  cd ~
+  git clone https://github.com/martine/ninja.git -b v1.7.2
+  cd ninja &amp;&amp; ./configure.py --bootstrap
+Then add ~/ninja/ to your PATH.
+Traceback (most recent call last):
+  File &quot;script/build&quot;, line 57, in &lt;module&gt;
+    sys.exit(main())
+  File &quot;script/build&quot;, line 43, in main
+    subprocess.check_call([NINJA, '-C', os.path.relpath(out_dir), target], env=env)
+  File &quot;/usr/local/lib/python2.7/subprocess.py&quot;, line 186, in check_call
+    raise CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command '['/home/qbit/dev/libchromiumcontent/vendor/depot_tools/ninja', '-C', 'src/out-x64/static_library', 'chromiumcontent:chromiumcontent']' returned non-zero exit status 1
+qbit@slip[1]:libchromiumcontent[master *%=]λ which ninja
+/usr/local/bin/ninja
+qbit@slip[0]:libchromiumcontent[master *%=]λ
+</code></pre>
+
+<p>Clearly we are dealing with a beast that is too smart for its own
+good.</p>
+
+<h1>Fixing sub-sub-tools</h1>
+
+<p>Since <code>depot_tools</code> is a Google project, it&rsquo;s easier to edit the files
+in the <code>vendor</code> directory and pretend nothing ever happened.</p>
+
+<pre><code>diff --git a/ninja b/ninja
+index 282cc276..e22cbb9a 100755
+--- a/ninja
++++ b/ninja
+@@ -37,7 +37,5 @@ case &quot;$OS&quot; in
+   Darwin)    exec &quot;${THIS_DIR}/ninja-mac&quot; &quot;$@&quot;;;
+   CYGWIN*)   exec cmd.exe /c $(cygpath -t windows $0).exe &quot;$@&quot;;;
+   MINGW*)    cmd.exe //c $0.exe &quot;$@&quot;;;
+-  *)         echo &quot;Unsupported OS ${OS}&quot;
+-             print_help
+-             exit 1;;
++  *)         exec &quot;/usr/local/bin/ninja&quot; &quot;$@&quot;;;
+ esac
+</code></pre>
+
+<p>Sigh. So many assumptions, lets continue the trend!</p>
+
+<pre><code>cd ../../
+</code></pre>
+
+<p>Re-run <code>script/build -t x64</code>&hellip;</p>
+
+<p>No luck. At this point we are faced with a complex web of python
+scripts that execute <code>gn</code> on GN files to produce ninja files&hellip; which
+then build the various components and somewhere in that cluster,
+something doesn&rsquo;t know about OpenBSD&hellip;</p>
+
+<p><strong><em>I look at Henry, he is looking a photo of his wife and kids. They
+   are sitting on a telephone wire, the morning sun illuminating their
+   beautiful faces. Henry looks back at me and says &ldquo;It&rsquo;s not worth
+   it.&rdquo;</em></strong></p>
+
+<p><strong><em>We slam the laptop shut and go outside.</em></strong></p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+        PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / 3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE
+      </div>
+    </div>
+  </body>
+</html>
+
+
