@@ -1,6 +1,6 @@
 author: Aaron Bieber <aaron@bolddaemon.com>
 title: Measuring the weight of an electron
-description: Electron's are small, should be easy. Right?!
+description: Electrons are small, should be easy. Right?!
 tags: OpenBSD,Electron,Software
 date: Thu, 01 Jun 2017 07:18:00 MST
 
