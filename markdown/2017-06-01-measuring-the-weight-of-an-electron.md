@@ -255,12 +255,12 @@ else:
 Ok, lets try that.. We copy the tar.xz out of its safe_space...
 
 ```
-Skipping Chromium Source Tarball Download                                                                                                                                            
-Traceback (most recent call last):                                                          
-  File "/home/qbit/dev/libchromiumcontent/vendor/python-patch/patch.py", line 1136, in <module>                                                                                      
-    patch.apply(options.strip, root=options.directory) or sys.exit(-1)                     
+Skipping Chromium Source Tarball Download
+Traceback (most recent call last):
+  File "/home/qbit/dev/libchromiumcontent/vendor/python-patch/patch.py", line 1136, in <module>
+    patch.apply(options.strip, root=options.directory) or sys.exit(-1)
   File "/home/qbit/dev/libchromiumcontent/vendor/python-patch/patch.py", line 778, in apply
-    os.chdir(root)                                                                     
+    os.chdir(root)
 OSError: [Errno 2] No such file or directory: '/home/qbit/dev/libchromiumcontent/src/.'
 ```
 
@@ -276,7 +276,7 @@ it... and pat ourselves on the back for having a `safe_space`!
  everything until now was just the tip of the iceberg***
 
 We remove the call to `update_clang`, because.. well.. we have two
-copies of it already and the Elctron doc said everything would be fine
+copies of it already and the Electron doc said everything would be fine
 if we had >= clang 3.4!
 
 Re-run..
@@ -298,7 +298,7 @@ This one, however, warrants further investigation!
 
 **We dig deeper into script/update**
 
-`update_gn()`.. pulls down a binary `gn`.. which, interestingly can
+`update_gn()`.. pulls down a binary `gn`.. which, interestingly, can
 be generated with the code we have right below our feet... but for
 some reason, they have this component already built. There is no
 pre-built version for OpenBSD.
@@ -323,7 +323,7 @@ index 234e4b3..b5c4afc 100755
 --- a/script/update
 +++ b/script/update
 @@ -52,9 +52,9 @@ def main():
- 
+
    return (apply_patches() or
            copy_chromiumcontent_files() or
 -          update_clang() or
@@ -333,15 +333,15 @@ index 234e4b3..b5c4afc 100755
 +          #update_gn() or
 +          #update_node() or
            run_gn(target_arch, args.defines))
- 
- 
+
+
 @@ -248,6 +248,8 @@ def run_gn(target_arch, defines):
      gn = os.path.join(SRC_DIR, 'buildtools', 'linux64', 'gn')
    elif sys.platform == 'darwin':
      gn = os.path.join(SRC_DIR, 'buildtools', 'mac', 'gn')
 +  elif sys.platform == 'openbsd6':
 +    gn = os.path.join(SRC_DIR, 'buildtools', 'openbsd', 'gn')
- 
+
    env = os.environ.copy()
    if sys.platform in ['win32', 'cygwin']:
 ```
@@ -353,7 +353,7 @@ ERROR at //build/config/sysroot.gni:95:5: Assertion failed.
     assert(
     ^-----
 Missing sysroot (//build/linux/debian_wheezy_amd64-sysroot). To fix, run: build/linux/sysroot_scripts/install-sysroot.py --arch=amd64
-See //build/config/sysroot.gni:96:9: 
+See //build/config/sysroot.gni:96:9:
         exec_script("//build/dir_exists.py",
         ^-----------------------------------
 ```
@@ -428,11 +428,11 @@ Re-run `script/build -t x64`...
 No luck. At this point we are faced with a complex web of python
 scripts that execute `gn` on GN files to produce ninja files... which
 then build the various components and somewhere in that cluster,
-something doesn't know about OpenBSD... 
+something doesn't know about OpenBSD...
 
 ***I look at Henry, he is looking a photo of his wife and kids. They
    are sitting on a telephone wire, the morning sun illuminating their
    beautiful faces. Henry looks back at me and says "It's not worth
-   it."*** 
+   it."***
 
 ***We slam the laptop shut and go outside.***
