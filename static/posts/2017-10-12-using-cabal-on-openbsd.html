@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - Using cabal on OpenBSD</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><i class="fa fa-github-square fa-3x"></i></a>
+        <a href="https://www.linkedin.com/in/abieber/en"><i class="fa fa-linkedin-square fa-3x"></i></a>
+        <a href="https://twitter.com/qb1t"><i class="fa fa-twitter-square fa-3x"></i></a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" /></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" /></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Using cabal on OpenBSD</h1>
+<i>Quick rundown for using cabal in a W^X&#39;d world.</i>
+<div class="info">
+    Posted on Tue, 12 Sep 2017 16:35:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, Software, Haskell</div>
+</div>
+
+<p>Since OpenBSD <a href="https://undeadly.org/cgi?action=article&amp;sid=20160527203200">switched on
+W^X</a>,
+W^X&rsquo;d binaries are only allowed to be executed from designated
+locations (mount points). If you used the auto partition layout during
+install, your <code>/usr/local/</code> will be mounted with <code>wxallowed</code>. For
+example, here is the entry for my current machine:</p>
+
+<pre><code>/dev/sd2g on /usr/local type ffs (local, nodev, wxallowed, softdep)
+</code></pre>
+
+<p>This is a great feature, but if you build applications outside of the
+<code>wxallowed</code> partition, you are going to run into some issues,
+especially in the case of <code>cabal</code> (python as well).</p>
+
+<p>Here is an example of what you would see when attempting to do <code>cabal
+install pandoc</code>:</p>
+
+<pre><code>qbit@slip[1]:~λ cabal update
+Config file path source is default config file.
+Config file /home/qbit/.cabal/config not found.
+Writing default configuration to /home/qbit/.cabal/config
+Downloading the latest package list from hackage.haskell.org
+qbit@slip[0]:~λ cabal install pandoc
+Resolving dependencies...
+.....
+cabal: user error (Error: some packages failed to install:
+JuicyPixels-3.2.8.3 failed during the configure step. The exception was:
+/home/qbit/.cabal/setup-exe-cache/setup-Simple-Cabal-1.22.5.0-x86_64-openbsd-ghc-7.10.3: runProcess: runInteractiveProcess: exec: permission denied (Permission denied)
+</code></pre>
+
+<p>The error isn&rsquo;t actually what it says. The untrained eye would assume
+permissions issue. A quick check of <code>dmesg</code> reveals what is really
+happening:</p>
+
+<pre><code>/home/qbit/.cabal/setup-exe-cache/setup-Simple-Cabal-1.22.5.0-x86_64-openbsd-ghc-7.10.3(22924): W^X binary outside wxallowed mountpoint
+</code></pre>
+
+<p>OpenBSD is killing the above binary because it is violating W^X and
+hasn&rsquo;t been safely kept in its <code>/usr/local</code> corral!</p>
+
+<p>We could solve this problem quickly by marking our <code>/home</code> as
+<code>wxallowed</code>, however, this would be heavy handed and reckless (we
+don&rsquo;t want to allow other potentially unsafe binaries to
+execute.. just the cabal stuff).</p>
+
+<p>Instead, we will build all our cabal stuff in <code>/usr/local</code> by using
+a symlink!</p>
+
+<pre><code>doas mkdir -p /usr/local/{cabal,cabal/build} # make our cabal and build dirs
+doas chown -R user:wheel /usr/local/cabal    # set perms
+rm -rf ~/.cabal                              # kill the old non-working cabal
+ln -s /usr/local/cabal ~/.cabal              # link it!
+</code></pre>
+
+<p>We are almost there! Some cabal packages build outside of
+<code>~/.cabal</code>:</p>
+
+<pre><code>cabal install hakyll
+.....
+Building foundation-0.0.14...                                                   Preprocessing library foundation-0.0.14...
+hsc2hs: dist/build/Foundation/System/Bindings/Posix_hsc_make: runProcess: runInteractiveProcess: exec: permission denied (Permission denied)
+Downloading time-locale-compat-0.1.1.3...
+.....
+</code></pre>
+
+<p>Fortunately, all of the packages I have come across that do this all
+respect the <code>TMPDIR</code> environment variable!</p>
+
+<pre><code>alias cabal='env TMPDIR=/usr/local/cabal/build/ cabal'
+</code></pre>
+
+<p>With this alias, you should be able to cabal without issue (so far
+pandoc, shellcheck and hakyll have all built fine)!</p>
+
+<hr />
+
+<h2>TL;DR</h2>
+
+<pre><code># This assumes /usr/local/ is mounted as wxallowed.
+#
+doas mkdir -p /usr/local/{cabal,cabal/build}
+doas chown -R user:wheel /usr/local/cabal
+rm -rf ~/.cabal
+ln -s /usr/local/cabal ~/.cabal
+alias cabal='env TMPDIR=/usr/local/cabal/build/ cabal'
+cabal install pandoc
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated via <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a>
+      <div id="attrib">
+	      PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / <a href="https://deftly.net/pubkey.asc">3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE</a>
+      </div>
+    </div>
+  </body>
+</html>
+
+

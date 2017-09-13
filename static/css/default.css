@@ -48,6 +48,7 @@ div#header #navigation img {
 }
 
 div#footer {
+    font-family: Inconsolata, Courier, monospace;
     font-size: 12px;
     padding: 12px 0px 12px 135px;
     text-align: left;
