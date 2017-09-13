@@ -38,12 +38,12 @@
     <div class="tags">Tags: OpenBSD, Software, Haskell</div>
 </div>
 
-<p>Since OpenBSD <a href="https://undeadly.org/cgi?action=article&amp;sid=20160527203200">switched on
-W^X</a>,
-W^X&rsquo;d binaries are only allowed to be executed from designated
-locations (mount points). If you used the auto partition layout during
-install, your <code>/usr/local/</code> will be mounted with <code>wxallowed</code>. For
-example, here is the entry for my current machine:</p>
+<p>Since <a href="https://undeadly.org/cgi?action=article&amp;sid=20160527203200">W^X became
+mandatory</a>
+in OpenBSD, W^X&rsquo;d binaries are only allowed to be executed from
+designated locations (mount points). If you used the auto partition
+layout during install, your <code>/usr/local/</code> will be mounted with
+<code>wxallowed</code>. For example, here is the entry for my current machine:</p>
 
 <pre><code>/dev/sd2g on /usr/local type ffs (local, nodev, wxallowed, softdep)
 </code></pre>

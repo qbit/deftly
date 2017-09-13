@@ -4,12 +4,12 @@ description: Quick rundown for using cabal in a W^X'd world.
 tags: OpenBSD,Software,Haskell
 date: Tue, 12 Sep 2017 16:35:00 MDT
 
-Since OpenBSD [switched on
-W^X](https://undeadly.org/cgi?action=article&sid=20160527203200),
-W^X'd binaries are only allowed to be executed from designated
-locations (mount points). If you used the auto partition layout during
-install, your `/usr/local/` will be mounted with `wxallowed`. For
-example, here is the entry for my current machine:
+Since [W^X became
+mandatory](https://undeadly.org/cgi?action=article&sid=20160527203200)
+in OpenBSD, W^X'd binaries are only allowed to be executed from
+designated locations (mount points). If you used the auto partition
+layout during install, your `/usr/local/` will be mounted with
+`wxallowed`. For example, here is the entry for my current machine:
 
 ```
 /dev/sd2g on /usr/local type ffs (local, nodev, wxallowed, softdep)
