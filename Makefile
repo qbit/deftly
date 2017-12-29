@@ -7,7 +7,7 @@ publish: sign render
 	rsync -av --progress static/ web.akb.io:/var/www/deftly/
 
 watch:
-	boring -w -wdir markdown -wcmd "make"
+	boring -w -wdir markdown -wcmd "make" -wsrv static/
 
 sign:
 	(cd static; sha256 posts/*.html > posts/SHA256)
