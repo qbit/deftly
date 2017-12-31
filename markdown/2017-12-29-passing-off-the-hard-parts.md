@@ -55,7 +55,7 @@ extra level of privledge separation for sensitive passwords),
 is pledge()'d, AND can run on every OS I use!
 
 For browsers, I have settled on [browserpass](https://github.com/dannyvankooten/browserpass). It's also written
-in Go, pledge()'d, works on all my systems[1] (OpenBSD, Windows
+in Go, pledge()'d, works on all my systems* (OpenBSD, Windows
 macos), has auto-fill and easy to grok source code!
 
 For iOS/Android there are [passforios](https://github.com/mssun/passforios) and [Android-Password-Store](https://github.com/zeapo/Android-Password-Store). All of which support
@@ -117,6 +117,6 @@ more than I trust a web server!
 something like:
 `gpg -d ~/.password-store/Web/google.com | head -n1 | xclip`
 
-[1] Currently there is a bug in Firefox on OpenBSD that prevents
+\* Currently there is a bug in Firefox on OpenBSD that prevents
 native extensions from functioning.. I hope to get this fixed
 soon! Chromium works fine, however.
