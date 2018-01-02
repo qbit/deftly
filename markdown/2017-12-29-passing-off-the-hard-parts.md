@@ -47,7 +47,7 @@ It doesn't, however, work out of the box on iOS/Android or my
 browser. Fortunately for me - pass has a fantastic ecosystem
 with a multitude of 3rd party browser extensions, iOS/Android apps.. best
 all, they are open source! There are even full replacements for
-pass itself! One such replacements is [gopass](https://github.com/justwatch/gopass).
+pass itself! One such replacements is [gopass](https://github.com/justwatchcom/gopass).
 
 `gopass` extends pass a bit further, it's written in Go,
 seamlessly supports multiple "stores" (allowing me to have an
