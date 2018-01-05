@@ -16,4 +16,4 @@ SHA256 (posts/2017-02-27-ssh-fp-verification-using-tor.html) = e1748716b1f7e5b58
 SHA256 (posts/2017-05-01-openbsd-ksh-tab-complete.html) = 1e334d994c706d62739454eeecfbf0be56be696e4e32f62829c68103d1821925
 SHA256 (posts/2017-06-01-measuring-the-weight-of-an-electron.html) = da8cbfdae8508b3e52624979fe007b4be6924f14a5451db3cd7b2f9b8446b7cc
 SHA256 (posts/2017-10-12-using-cabal-on-openbsd.html) = 7d4b0dad9976106beec7c7fec7961907423f1bfe69198bae9f6416624fb2b7b8
-SHA256 (posts/2017-12-29-passing-off-the-hard-parts.html) = d448be071e831ad385d260eef14553c817fd212f390042397a2ec42d6e953793
+SHA256 (posts/2017-12-29-passing-off-the-hard-parts.html) = 8562bde389d4976e4d4ba751a2a1c5fb613ece119bcc6571265f793385836a78
