@@ -5,6 +5,7 @@ render:
 
 publish: sign render
 	rsync -av --progress static/ web.akb.io:/var/www/deftly/
+	rsync -av --progress markdown/ root@web.akb.io:/var/gopher/articles/
 
 watch:
 	boring -w -wdir markdown -wcmd "make" -wsrv static/
