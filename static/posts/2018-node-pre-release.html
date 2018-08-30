@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - Test packages for Node on OpenBSD</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><img src="/images/GitHub-Mark-64px.png" />GitHub</a>
+        <a href="https://www.linkedin.com/in/abieber/en"><img src="/images/linked_in.png" />LinkedIn</a>
+        <a href="https://twitter.com/qb1t"><img src="/images/twitter.png" />Twitter</a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" alt="CoBUG.org"/></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" alt="code.bolddaemon.com"/></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Test packages for Node on OpenBSD</h1>
+<i>Have your nodes and eat them too!</i>
+<div class="info">
+    Posted on Thu, 30 Aug 2018 09:00:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, Node.js</div>
+</div>
+
+<h1>Test builds for node</h1>
+
+<p>In an attempt to get a wider range of testing for <code>lang/node</code>, I have decided
+to make test builds available here on <a href="https://deftly.net/pub/OpenBSD">deftly.net</a>.</p>
+
+<p>If you want to test node, but don&rsquo;t want to build the package yourself, you
+can simply run the following to upgrade your current install:</p>
+
+<pre><code>env PKG_PATH=https://deftly.net/pub/OpenBSD/snapshots/packages/$(machine) pkg_add -u node
+</code></pre>
+
+<p>All the packages pushed here will be signed via <a href="https://man.openbsd.org/signify">signify(1)</a>.</p>
+
+<p>To make use of the signing, you will have to copy the below pub key to
+<code>/etc/signify/abieber-pkg.pub</code></p>
+
+<pre><code>untrusted comment: signify public key
+RWRaFou/737fpovRq3OP3lZnz/97lbq2wYXFFk90nYUaW8xbc2HTd2xj
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated using <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a> and <a href="https://github.com/qbit/deftly/"><i>these</i></a> files.
+      <div id="attrib">
+	      PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / <a href="https://deftly.net/pubkey.asc">3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE</a>
+      </div>
+    </div>
+  </body>
+</html>
+
+

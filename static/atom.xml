@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom">
   <title>deftly.net - All posts</title>
   <id>https://deftly.net/</id>
-  <updated>2017-12-29T08:00:00-07:00</updated>
+  <updated>2018-08-30T09:00:00-06:00</updated>
   <rights>This work is copyright © Aaron Bieber</rights>
   <subtitle>Personal blog of Aaron Bieber</subtitle>
   <link href="https://deftly.net/"></link>
@@ -9,6 +9,17 @@
     <name>Aaron Bieber</name>
     <email>aaron@bolddaemon.com</email>
   </author>
+  <entry>
+    <title>Test packages for Node on OpenBSD</title>
+    <updated>2018-08-30T09:00:00-06:00</updated>
+    <id>tag:deftly.net,2018-08-30:/posts/2018-node-pre-release.html</id>
+    <link href="https://deftly.net/posts/2018-node-pre-release.html" rel="alternate"></link>
+    <summary type="html">&lt;h1&gt;Test builds for node&lt;/h1&gt;&#xA;&#xA;&lt;p&gt;In an attempt to get a wider range of testing for &lt;code&gt;lang/node&lt;/code&gt;, I have decided&#xA;to make test builds available here on &lt;a href=&#34;https://deftly.net/pub/OpenBSD&#34;&gt;deftly.net&lt;/a&gt;.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;If you want to test node, but don&amp;rsquo;t want to build the package yourself, you&#xA;can simply run the following to upgrade your current install:&lt;/p&gt;&#xA;&#xA;&lt;pre&gt;&lt;code&gt;env PKG_PATH=https://deftly.net/pub/OpenBSD/snapshots/packages/$(machine) pkg_add -u node&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&#xA;&lt;p&gt;All the packages pushed here will be signed via &lt;a href=&#34;https://man.openbsd.org/signify&#34;&gt;signify(1)&lt;/a&gt;.&lt;/p&gt;&#xA;&#xA;&lt;p&gt;To make use of the signing, you will have to copy the below pub key to&#xA;&lt;code&gt;/etc/signify/abieber-pkg.pub&lt;/code&gt;&lt;/p&gt;&#xA;&#xA;&lt;pre&gt;&lt;code&gt;untrusted comment: signify public key&#xA;RWRaFou/737fpovRq3OP3lZnz/97lbq2wYXFFk90nYUaW8xbc2HTd2xj&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;</summary>
+    <author>
+      <name>Aaron Bieber</name>
+      <email>aaron@bolddaemon.com</email>
+    </author>
+  </entry>
   <entry>
     <title>Passing off the Complexity</title>
     <updated>2017-12-29T08:00:00-07:00</updated>
