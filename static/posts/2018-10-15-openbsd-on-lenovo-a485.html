@@ -1,0 +1,378 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - OpenBSD on the Lenovo A485</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><img src="/images/GitHub-Mark-64px.png" />GitHub</a>
+        <a href="https://www.linkedin.com/in/abieber/en"><img src="/images/linked_in.png" />LinkedIn</a>
+        <a href="https://twitter.com/qb1t"><img src="/images/twitter.png" />Twitter</a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" alt="CoBUG.org"/></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" alt="code.bolddaemon.com"/></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>OpenBSD on the Lenovo A485</h1>
+<i>Hack up or put up!</i>
+<div class="info">
+    Posted on Mon, 15 Oct 2018 09:00:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, Hardware</div>
+</div>
+
+<p>I am going to attempt to do a jcs@ style review of the Lenovo A485. I
+have stolen his format, slacked on detail.. and generally not done as
+good of a job reviewing as he has. Please check out his work at <a href="https://jcs.org">jcs.org</a></p>
+
+<h2>Hardware</h2>
+
+<p>In typical Lenovo fashion, the A485 has three point eight gajillion
+configuration options one can select from during &ldquo;Customization&rdquo;. You
+can even get it with a built in SmartCard™ reader!</p>
+
+<p>You can select SATA SSD or NVMe SSD, anywhere from 4GB to 32GB of
+Memory, AMD Ryzen™ 3, 5 or 7!</p>
+
+<p>Since this is going to be my main machine for as many years as I can
+possibly squeeze out of it, I opted for &ldquo;all the things!&rdquo;!</p>
+
+<p>The display options leave a little to be desired. Max resolution is
+1920x1080. Not <em>bad</em> but not <em>great</em> either.</p>
+
+<h2>Installing OpenBSD</h2>
+
+<ul>
+<li>Put install media into laptop.</li>
+<li>Politely ask Henry on stand on the &ldquo;enter&rdquo; key.</li>
+<li>\o/</li>
+</ul>
+
+<h2>Support Summary</h2>
+
+<p><em>OpenBSD-current</em> as of <em>2018-10-15</em></p>
+
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th align="center">Works?</th>
+<th>Notes</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Accelerated graphics</td>
+<td align="center">No</td>
+<td>The Radeon™ Vega 6 integrated GPU isn&rsquo;t supported currently. X11 is usable via the <a href="https://man.openbsd.org/efifb">efifb</a> driver which does an impressive job and displays things at the native resolution (1920x1080)! I am able to watch youtube videos without issue.</td>
+</tr>
+
+<tr>
+<td>AC adapter</td>
+<td align="center">Yes</td>
+<td>USB-C connector. Has a satisfying click when connecting.. flops about wildly while connected. Attaches as <a href="https://man.openbsd.org/acpiac">acpiac</a>.</td>
+</tr>
+
+<tr>
+<td>Audio</td>
+<td align="center">Yes-ish</td>
+<td>Audio works as expected though there is a known bug with <a href="https://man.openbsd.org/azalia">azalia</a> on Ryzen that causes it to stop working after a period of time.</td>
+</tr>
+
+<tr>
+<td>Battery status</td>
+<td align="center">Yes</td>
+<td>Status is visible in <code>apm</code> and <code>hw.sensors</code>. Attaches as <a href="https://man.openbsd.org/acpibat">acpibat</a>.</td>
+</tr>
+
+<tr>
+<td>Bluetooth</td>
+<td align="center">No</td>
+<td>No support in OpenBSD. BT can be disabled in the bios.</td>
+</tr>
+
+<tr>
+<td>Cameras</td>
+<td align="center">No</td>
+<td>When attempting to use the camera via <code>/dev/video</code>, the &ldquo;activity&rdquo; light turns on, but it seems the video device isn&rsquo;t compatible. Awesome side note, there is a built-in slider to cover the camera lens!</td>
+</tr>
+
+<tr>
+<td>Ethernet</td>
+<td align="center">Yes</td>
+<td>Weirdly, there are two ethernet devices, <code>re0</code> and <code>re1</code>. <code>re1</code> is the physical ethernet port on the laptop. I can only assume that <code>re0</code> is the would-be-dock-ethernet?</td>
+</tr>
+
+<tr>
+<td>Hibernation</td>
+<td align="center">Maybe</td>
+<td>This could be because I didn&rsquo;t create a swap partition that was 32GB.</td>
+</tr>
+
+<tr>
+<td>MicroSD slot</td>
+<td align="center">Yes</td>
+<td>Inserted cards show up fine.</td>
+</tr>
+
+<tr>
+<td>Suspend/Resume</td>
+<td align="center">No</td>
+<td>Technically the machine suspends / resumes, but X11 never comes back.</td>
+</tr>
+
+<tr>
+<td>Volume buttons</td>
+<td align="center">Yes</td>
+<td>Via <a href="https://man.openbsd.org/acpithinkpad">acpithinkpad</a>.</td>
+</tr>
+
+<tr>
+<td>Wireless</td>
+<td align="center">No</td>
+<td>The machine comes with a Realtek RTL8822BE, which isn&rsquo;t supported currently. I was able to replace this with an Intel Dual Band Wireless-AC 8265.</td>
+</tr>
+</tbody>
+</table>
+
+<h2>dmesg</h2>
+
+<pre><code>OpenBSD 6.4 (GENERIC.MP) #0: Thu Oct 11 14:54:13 MDT 2018
+    qbit@ren.tapenet.org:/sys/arch/amd64/compile/GENERIC.MP
+real mem = 33139396608 (31604MB)
+avail mem = 32125767680 (30637MB)
+mpath0 at root
+scsibus0 at mpath0: 256 targets
+mainbus0 at root
+bios0 at mainbus0: SMBIOS rev. 3.1 @ 0x68607000 (62 entries)
+bios0: vendor LENOVO version &quot;R0WET34W (1.02 )&quot; date 07/05/2018
+bios0: LENOVO 20MUCTO1WW
+acpi0 at bios0: rev 2
+acpi0: BGRT checksum error
+acpi0: sleep states S0 S3 S4 S5
+acpi0: tables DSDT FACP SSDT SSDT CRAT CDIT SSDT TPM2 UEFI MSDM BATB HPET APIC MCFG SBST VFCT IVRS FPDT SSDT SSDT SSDT UEFI SSDT BGRT
+acpi0: wakeup devices GPP0(S3) GPP1(S3) GPP2(S3) GPP3(S3) GPP4(S3) L850(S3) GPP5(S3) GPP6(S3) GP17(S3) XHC0(S3) XHC1(S3) GP18(S3) LID_(S3) SLPB(S3)
+acpitimer0 at acpi0: 3579545 Hz, 32 bits
+acpihpet0 at acpi0: 14318180 Hz
+acpimadt0 at acpi0 addr 0xfee00000: PC-AT compat
+cpu0 at mainbus0: apid 0 (boot processor)
+cpu0: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2196.29 MHz, 17-11-00
+cpu0: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu0: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu0: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu0: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu0: smt 0, core 0, package 0
+mtrr: Pentium Pro MTRR support, 8 var ranges, 88 fixed ranges
+cpu0: apic clock running at 24MHz
+cpu0: mwait min=64, max=64, C-substates=1.1, IBE
+cpu1 at mainbus0: apid 1 (application processor)
+cpu1: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu1: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu1: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu1: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu1: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu1: smt 1, core 0, package 0
+cpu2 at mainbus0: apid 2 (application processor)
+cpu2: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu2: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu2: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu2: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu2: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu2: smt 0, core 1, package 0
+cpu3 at mainbus0: apid 3 (application processor)
+cpu3: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu3: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu3: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu3: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu3: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu3: smt 1, core 1, package 0
+cpu4 at mainbus0: apid 4 (application processor)
+cpu4: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu4: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu4: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu4: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu4: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu4: smt 0, core 2, package 0
+cpu5 at mainbus0: apid 5 (application processor)
+cpu5: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu5: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu5: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu5: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu5: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu5: smt 1, core 2, package 0
+cpu6 at mainbus0: apid 6 (application processor)
+cpu6: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu6: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu6: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu6: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu6: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu6: smt 0, core 3, package 0
+cpu7 at mainbus0: apid 7 (application processor)
+cpu7: AMD Ryzen 7 PRO 2700U w/ Radeon Vega Mobile Gfx, 2195.85 MHz, 17-11-00
+cpu7: FPU,VME,DE,PSE,TSC,MSR,PAE,MCE,CX8,APIC,SEP,MTRR,PGE,MCA,CMOV,PAT,PSE36,CFLUSH,MMX,FXSR,SSE,SSE2,HTT,SSE3,PCLMUL,MWAIT,SSSE3,FMA3,CX16,SSE4.1,SSE4.2,MOVBE,POPCNT,AES,XSAVE,AVX,F16C,RDRAND,NXE,MMXX,FFXSR,PAGE1GB,RDTSCP,LONG,LAHF,CMPLEG,SVM,EAPICSP,AMCR8,ABM,SSE4A,MASSE,3DNOWP,OSVW,SKINIT,TCE,TOPEXT,CPCTR,DBKP,PCTRL3,MWAITX,ITSC,FSGSBASE,BMI1,AVX2,SMEP,BMI2,RDSEED,ADX,SMAP,CLFLUSHOPT,SHA,IBPB,XSAVEOPT,XSAVEC,XGETBV1,XSAVES
+cpu7: 64KB 64b/line 4-way I-cache, 32KB 64b/line 8-way D-cache, 512KB 64b/line 8-way L2 cache, 4MB 64b/line 16-way L3 cache
+cpu7: ITLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu7: DTLB 64 4KB entries fully associative, 64 4MB entries fully associative
+cpu7: smt 1, core 3, package 0
+ioapic0 at mainbus0: apid 32 pa 0xfec00000, version 21, 24 pins, can't remap
+ioapic1 at mainbus0: apid 33 pa 0xfec01000, version 21, 32 pins, can't remap
+acpimcfg0 at acpi0
+acpimcfg0: addr 0xf8000000, bus 0-63
+acpiprt0 at acpi0: bus 0 (PCI0)
+acpiprt1 at acpi0: bus 1 (GPP0)
+acpiprt2 at acpi0: bus 2 (GPP1)
+acpiprt3 at acpi0: bus 3 (GPP2)
+acpiprt4 at acpi0: bus 4 (GPP3)
+acpiprt5 at acpi0: bus -1 (GPP4)
+acpiprt6 at acpi0: bus 5 (GPP5)
+acpiprt7 at acpi0: bus -1 (GPP6)
+acpiprt8 at acpi0: bus 6 (GP17)
+acpiprt9 at acpi0: bus 7 (GP18)
+acpiec0 at acpi0
+acpicpu0 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu1 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu2 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu3 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu4 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu5 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu6 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpicpu7 at acpi0: C2(0@400 io@0x414), C1(0@1 mwait), PSS
+acpipwrres0 at acpi0: PUBS, resource for XHC0
+acpipwrres1 at acpi0: P0ST, resource for SATA
+acpipwrres2 at acpi0: P3ST, resource for SATA
+acpibtn0 at acpi0: PWRB
+acpicmos0 at acpi0
+acpibat0 at acpi0: BAT0 model &quot;01AV489&quot; serial  3225 type LiP oem &quot;LGC&quot;
+acpibat1 at acpi0: BAT1 model &quot;01AV452&quot; serial  1401 type LiP oem &quot;SMP&quot;
+acpiac0 at acpi0: AC unit online
+acpithinkpad0 at acpi0
+&quot;SMB0001&quot; at acpi0 not configured
+acpibtn1 at acpi0: LID_
+acpibtn2 at acpi0: SLPB
+&quot;PNP0C14&quot; at acpi0 not configured
+&quot;PNP0C14&quot; at acpi0 not configured
+&quot;PNP0C14&quot; at acpi0 not configured
+&quot;STM7304&quot; at acpi0 not configured
+&quot;USBC000&quot; at acpi0 not configured
+acpivideo0 at acpi0: VGA_
+cpu0: 2196 MHz: speeds: 2200 1700 1600 MHz
+pci0 at mainbus0 bus 0
+pchb0 at pci0 dev 0 function 0 vendor &quot;AMD&quot;, unknown product 0x15d0 rev 0x00
+vendor &quot;AMD&quot;, unknown product 0x15d1 (class system subclass IOMMU, rev 0x00) at pci0 dev 0 function 2 not configured
+pchb1 at pci0 dev 1 function 0 &quot;AMD AMD64 17h PCIE&quot; rev 0x00
+ppb0 at pci0 dev 1 function 1 vendor &quot;AMD&quot;, unknown product 0x15d3 rev 0x00: msi
+pci1 at ppb0 bus 1
+rtsx0 at pci1 dev 0 function 0 &quot;Realtek RTS522A Card Reader&quot; rev 0x01: msi
+sdmmc0 at rtsx0: 4-bit, dma
+ppb1 at pci0 dev 1 function 2 vendor &quot;AMD&quot;, unknown product 0x15d3 rev 0x00: msi
+pci2 at ppb1 bus 2
+iwm0 at pci2 dev 0 function 0 &quot;Intel Dual Band Wireless-AC 8265&quot; rev 0x78, msi
+ppb2 at pci0 dev 1 function 3 vendor &quot;AMD&quot;, unknown product 0x15d3 rev 0x00: msi
+pci3 at ppb2 bus 3
+nvme0 at pci3 dev 0 function 0 &quot;Samsung SM981/PM981 NVMe&quot; rev 0x00: msi, NVMe 1.2
+nvme0: SAMSUNG MZVLB512HAJQ-000L7, firmware 4L2QEXA7, serial S3TNNX0K825659
+scsibus1 at nvme0: 1 targets
+sd0 at scsibus1 targ 0 lun 0: &lt;NVMe, SAMSUNG MZVLB512, 4L2Q&gt; SCSI4 0/direct fixed
+sd0: 488386MB, 512 bytes/sector, 1000215216 sectors
+ppb3 at pci0 dev 1 function 4 vendor &quot;AMD&quot;, unknown product 0x15d3 rev 0x00: msi
+pci4 at ppb3 bus 4
+re0 at pci4 dev 0 function 0 &quot;Realtek 8168&quot; rev 0x0e: RTL8168EP/8111EP (0x5000), msi, address 8c:16:45:c9:32:ae
+rgephy0 at re0 phy 7: RTL8251 PHY, rev. 0
+vendor &quot;Realtek&quot;, unknown product 0x816a (class communications subclass serial, rev 0x0e) at pci4 dev 0 function 1 not configured
+vendor &quot;Realtek&quot;, unknown product 0x816b (class communications subclass serial, rev 0x0e) at pci4 dev 0 function 2 not configured
+vendor &quot;Realtek&quot;, unknown product 0x816c (class serial bus subclass IPMI, rev 0x0e) at pci4 dev 0 function 3 not configured
+ehci0 at pci4 dev 0 function 4 vendor &quot;Realtek&quot;, unknown product 0x816d rev 0x0e: apic 33 int 15
+ehci0: pre-2.0 USB rev
+ppb4 at pci0 dev 1 function 6 vendor &quot;AMD&quot;, unknown product 0x15d3 rev 0x00: msi
+pci5 at ppb4 bus 5
+re1 at pci5 dev 0 function 0 &quot;Realtek 8168&quot; rev 0x10: RTL8168GU/8111GU (0x5080), msi, address 8c:16:45:c9:32:ad
+rgephy1 at re1 phy 7: RTL8251 PHY, rev. 0
+pchb2 at pci0 dev 8 function 0 &quot;AMD AMD64 17h PCIE&quot; rev 0x00
+ppb5 at pci0 dev 8 function 1 vendor &quot;AMD&quot;, unknown product 0x15db rev 0x00
+pci6 at ppb5 bus 6
+vendor &quot;ATI&quot;, unknown product 0x15dd (class display subclass VGA, rev 0xd0) at pci6 dev 0 function 0 not configured
+azalia0 at pci6 dev 0 function 1 vendor &quot;ATI&quot;, unknown product 0x15de rev 0x00: msi
+azalia0: no supported codecs
+vendor &quot;AMD&quot;, unknown product 0x15df (class crypto subclass miscellaneous, rev 0x00) at pci6 dev 0 function 2 not configured
+xhci0 at pci6 dev 0 function 3 vendor &quot;AMD&quot;, unknown product 0x15e0 rev 0x00: msi, xHCI 1.16
+usb0 at xhci0: USB revision 3.0
+uhub0 at usb0 configuration 1 interface 0 &quot;AMD xHCI root hub&quot; rev 3.00/1.00 addr 1
+xhci1 at pci6 dev 0 function 4 vendor &quot;AMD&quot;, unknown product 0x15e1 rev 0x00: msi, xHCI 1.16
+usb1 at xhci1: USB revision 3.0
+uhub1 at usb1 configuration 1 interface 0 &quot;AMD xHCI root hub&quot; rev 3.00/1.00 addr 1
+azalia1 at pci6 dev 0 function 6 &quot;AMD Raven Ridge HD Audio&quot; rev 0x00: apic 33 int 30
+azalia1: codecs: Realtek/0x0257
+audio0 at azalia1
+ppb6 at pci0 dev 8 function 2 vendor &quot;AMD&quot;, unknown product 0x15dc rev 0x00
+pci7 at ppb6 bus 7
+ahci0 at pci7 dev 0 function 0 &quot;AMD Carrizo AHCI&quot; rev 0x61: msi, AHCI 1.3.1
+scsibus2 at ahci0: 32 targets
+&quot;AMD Carrizo SMBus&quot; rev 0x61 at pci0 dev 20 function 0 not configured
+pcib0 at pci0 dev 20 function 3 &quot;AMD Carrizo LPC&quot; rev 0x51
+pchb3 at pci0 dev 24 function 0 vendor &quot;AMD&quot;, unknown product 0x15e8 rev 0x00
+pchb4 at pci0 dev 24 function 1 vendor &quot;AMD&quot;, unknown product 0x15e9 rev 0x00
+pchb5 at pci0 dev 24 function 2 vendor &quot;AMD&quot;, unknown product 0x15ea rev 0x00
+pchb6 at pci0 dev 24 function 3 vendor &quot;AMD&quot;, unknown product 0x15eb rev 0x00
+pchb7 at pci0 dev 24 function 4 vendor &quot;AMD&quot;, unknown product 0x15ec rev 0x00
+pchb8 at pci0 dev 24 function 5 vendor &quot;AMD&quot;, unknown product 0x15ed rev 0x00
+pchb9 at pci0 dev 24 function 6 vendor &quot;AMD&quot;, unknown product 0x15ee rev 0x00
+pchb10 at pci0 dev 24 function 7 vendor &quot;AMD&quot;, unknown product 0x15ef rev 0x00
+isa0 at pcib0
+isadma0 at isa0
+pckbc0 at isa0 port 0x60/5 irq 1 irq 12
+pckbd0 at pckbc0 (kbd slot)
+wskbd0 at pckbd0: console keyboard
+pms0 at pckbc0 (aux slot)
+wsmouse0 at pms0 mux 0
+wsmouse1 at pms0 mux 0
+pms0: Synaptics clickpad, firmware 8.16, 0x1e2b1 0x940300
+pcppi0 at isa0 port 0x61
+spkr0 at pcppi0
+vmm0 at mainbus0: SVM/RVI
+efifb0 at mainbus0: 1920x1080, 32bpp
+wsdisplay0 at efifb0 mux 1: console (std, vt100 emulation), using wskbd0
+wsdisplay0: screen 1-5 added (std, vt100 emulation)
+uhub2 at uhub1 port 1 configuration 1 interface 0 &quot;Genesys Logic USB2.0 Hub&quot; rev 2.00/60.52 addr 2
+ugen0 at uhub2 port 1 &quot;vendor 0x06cb product 0x009a&quot; rev 2.00/1.64 addr 3
+ugen1 at uhub2 port 3 &quot;Generic EMV Smartcard Reader&quot; rev 2.01/1.20 addr 4
+uhub3 at uhub1 port 2 configuration 1 interface 0 &quot;Genesys Logic USB2.0 Hub&quot; rev 2.00/60.52 addr 5
+uvideo0 at uhub3 port 3 configuration 1 interface 0 &quot;Chicony Electronics Co.,Ltd. Integrated Camera&quot; rev 2.01/0.27 addr 6
+video0 at uvideo0
+vscsi0 at root
+scsibus3 at vscsi0: 256 targets
+softraid0 at root
+scsibus4 at softraid0: 256 targets
+sd1 at scsibus4 targ 1 lun 0: &lt;OPENBSD, SR CRYPTO, 006&gt; SCSI2 0/direct fixed
+sd1: 488385MB, 512 bytes/sector, 1000213601 sectors
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated using <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a> and <a href="https://github.com/qbit/deftly/"><i>these</i></a> files.
+      <div id="attrib">
+	      PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / <a href="https://deftly.net/pubkey.asc">3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE</a>
+      </div>
+    </div>
+  </body>
+</html>
+
+
