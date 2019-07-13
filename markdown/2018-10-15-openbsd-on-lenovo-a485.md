@@ -10,6 +10,9 @@ good of a job reviewing as he has. Please check out his work at [jcs.org](https:
 
 ## Hardware
 
+![Entire laptop](/images/147.jpg)
+![Screen and keyboard top](/images/144.jpg)
+
 In typical Lenovo fashion, the A485 has three point eight gajillion
 configuration options one can select from during "Customization". You
 can even get it with a built in SmartCard™ reader!
@@ -47,6 +50,14 @@ _OpenBSD-current_ as of _2018-10-15_
 | Suspend/Resume | No | Technically the machine suspends / resumes, but X11 never comes back. |
 | Volume buttons | Yes | Via [acpithinkpad](https://man.openbsd.org/acpithinkpad). |
 | Wireless | No | The machine comes with a Realtek RTL8822BE, which isn't supported currently. I was able to replace this with an Intel Dual Band Wireless-AC 8265. |
+
+Here are some photos of the built-in camera cover I mention in the
+Summary above.
+![Camera covered](/images/142.jpg)
+![Camera open](/images/143.jpg)
+
+![Picture of the AC / dock ports](/images/145.jpg)
+![Picture of the opposite side](/images/146.jpg)
 
 ## dmesg
 ```
