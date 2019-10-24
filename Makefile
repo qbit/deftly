@@ -4,8 +4,8 @@ render:
 	boring markdown/ templates/ static/
 
 publish: sign render
-	rsync -av static/ web.akb.io:/var/www/deftly/
-	rsync -av markdown/ root@web.akb.io:/var/gopher/articles/
+	openrsync --rsync-path=/usr/bin/openrsync -av static/ suah.dev:/var/www/deftly/
+	openrsync --rsync-path=/usr/bin/openrsync -av markdown/ root@suah.dev:/var/gopher/articles/
 
 watch:
 	boring -w -wdir markdown -wcmd "make" -wsrv static/

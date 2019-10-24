@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - Websockets with OpenBSD&#39;s relayd</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><img src="/images/GitHub-Mark-64px.png" />GitHub</a>
+        <a href="https://www.linkedin.com/in/abieber/en"><img src="/images/linked_in.png" />LinkedIn</a>
+        <a href="https://twitter.com/qb1t"><img src="/images/twitter.png" /> Twitter</a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" alt="CoBUG.org"/></a>
+        <a href="https://code.bolddaemon.com/qbit"><img src="https://code.bolddaemon.com/img/favicon.png" alt="code.bolddaemon.com"/></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Websockets with OpenBSD&#39;s relayd</h1>
+<i>Using websockets with relayd is EASY (unless you are on safari)!</i>
+<div class="info">
+    Posted on Wed, 23 Oct 2019 09:00:00 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD, relayd</div>
+</div>
+
+<h1>The need</h1>
+
+<p>I am in the process of replacing all my NGINX instances with <a href="https://man.openbsd.org/httpd">httpd</a>/<a href="https://man.openbsd.org/relayd">relayd</a>.
+So far this has been going pretty smoothly.</p>
+
+<p>I did, however, run into an issue with websockets in Safari on iOS and
+macOS which made me think they weren&rsquo;t working at all! Further testing proved
+they were working fine in other browsers, so .. more digging needs to be done!</p>
+
+<h1>The configs</h1>
+
+<p>I tested this in a VM running on OpenBSD. It&rsquo;s &lsquo;external&rsquo; IP is 10.10.10.15.</p>
+
+<p>This config also works with TLS but for simplicity, this example will be plain
+text.</p>
+
+<h2>relayd.conf</h2>
+
+<pre><code>ext_addr=&quot;10.10.10.15&quot;
+
+log connection errors
+
+table &lt;websocketd&gt; { 127.0.0.1 }
+
+http protocol ws {
+	match request header append &quot;X-Forwarded-For&quot; value &quot;$REMOTE_ADDR&quot;
+	match request header append &quot;X-Forwarded-By&quot; \
+		value &quot;$SERVER_ADDR:$SERVER_PORT&quot;
+	match request header &quot;Host&quot; value &quot;10.10.10.15&quot; forward to &lt;websocketd&gt;
+
+	http websockets
+}
+
+relay ws {
+	listen on $ext_addr port 8000
+	protocol ws
+	forward to &lt;websocketd&gt; port 9999
+}
+</code></pre>
+
+<p>Here we are setting up a &ldquo;websocket&rdquo; listener on port <code>8000</code> and forwarding
+it to port <code>9999</code> on <code>127.0.0.1</code> where we will be running <a href="http://websocketd.com/">websocketd</a>.</p>
+
+<p>The key directive is <code>http websockets</code> in the <code>http</code> block. Without this the
+proper headers won&rsquo;t be set and the connection will not work.</p>
+
+<h2>httpd.conf</h2>
+
+<pre><code># $OpenBSD: httpd.conf,v 1.20 2018/06/13 15:08:24 reyk Exp $
+
+server &quot;10.10.10.15&quot; {
+	listen on * port 80
+	location &quot;/*&quot; {
+		directory auto index
+	}
+}
+</code></pre>
+
+<p>Pretty simple. We are just going to serve the html file below.</p>
+
+<h3>/var/www/htdocs/index.html</h3>
+
+<p>This html blurb simply creates a websocket and pumps the data it receives into
+a div that we can see.</p>
+
+<pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;ws test&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;output&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;script&gt;
+let ws = new WebSocket(&quot;ws://10.10.10.15:8000/weechat&quot;);
+let d = document.getElementById('output');
+ws.onopen = function() {
+  ws.send(&quot;hi&quot;);
+};
+
+ws.onmessage = function (e) { 
+  d.innerText = d.innerText + &quot; &quot; + e.data;
+};
+
+ws.onclose = function() { 
+  d.innerText += (' done.'); 
+};
+&lt;/script&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h2>websocketd</h2>
+
+<p>Now we use <code>websocketd</code> to serve up some sweet sweet websocket action!</p>
+
+<pre><code>#!/bin/sh
+
+echo 'hi'
+
+for i in $(jot 5); do
+	echo $i;
+	sleep 1;
+done
+</code></pre>
+
+<p>Use <code>websocketd</code> to run the above script:</p>
+
+<pre><code>websocketd --port 9999 --address 127.0.0.1 ./above_script.sh
+</code></pre>
+
+<p>Now point your browser at <a href="http://10.10.10.15/">http://10.10.10.15/</a>! You will
+see &ldquo;hi&rdquo; and every second for five seconds you will see a count appended to
+<code>&lt;div id=&quot;output&quot;&gt;&lt;/div&gt;</code>!</p>
+
+<h1>The issues</h1>
+
+<p>The error I saw on Safari on iOS and macOS is:</p>
+
+<pre><code>'Connection' header value is not 'Upgrade'
+</code></pre>
+
+<p>Which is strange, bucaese I can see that it is infact set to &lsquo;Upgrade&rsquo; in a
+tcpdump.</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated using <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a> and <a href="https://github.com/qbit/deftly/"><i>these</i></a> files.
+      <div id="attrib">
+	      PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / <a href="https://deftly.net/pubkey.asc">3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE</a>
+      </div>
+    </div>
+  </body>
+</html>
+
+
