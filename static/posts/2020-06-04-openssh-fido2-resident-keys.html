@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - OpenSSH - Configuring FIDO2 Resident Keys</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><img src="/images/GitHub-Mark-64px.png" />GitHub</a>
+        <a href="https://www.linkedin.com/in/abieber/en"><img src="/images/linked_in.png" />LinkedIn</a>
+        <a href="https://twitter.com/qb1t"><img src="/images/twitter.png" /> Twitter</a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" alt="CoBUG.org"/></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>OpenSSH - Configuring FIDO2 Resident Keys</h1>
+<i>Configuring a YubiKey for ssh resident keys</i>
+<div class="info">
+    Posted on Thu, 04 Jun 2020 17:43:38 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenSSH YubiKey</div>
+</div>
+
+<h1>Table of Contents</h1>
+
+<ol>
+<li><a href="#orgeb6aa34">The Setup</a></li>
+<li><a href="#org3b8793a">Creating keys</a>
+
+<ol>
+<li><a href="#orgbc1a8c9">Generating the non-resident handle</a></li>
+<li><a href="#org05f4053">Generating the resident handle</a></li>
+</ol></li>
+<li><a href="#org2df8b52">Using the token</a>
+
+<ol>
+<li><a href="#org4f9e2ec">Resident</a>
+
+<ol>
+<li><a href="#orgd43612b">Transient usage with ssh-add</a></li>
+<li><a href="#org42b60c7">Permanent usage with ssh-agent</a></li>
+</ol></li>
+<li><a href="#org819b5f5">Non-resident</a></li>
+</ol></li>
+</ol>
+
+<p><a id="orgeb6aa34"></a></p>
+
+<h1>The Setup</h1>
+
+<p>If you haven&rsquo;t heard, OpenSSH recently (<span class="timestamp-wrapper"><span class="timestamp">[2020-02-14 Fri]</span></span>) <a href="https://www.openssh.com/txt/release-8.2">gained support for
+FIDO2/U2F hardware authenticators</a> like the YubiKey 5!</p>
+
+<p>This allows one to log into remote hosts with the touch of a button and it
+makes me feel like I am living in the future!</p>
+
+<p>Some of these hardware tokens even support multiple slots, allowing one to
+have multiple keys!</p>
+
+<p>On top of all that, the tokens can do &ldquo;resident&rdquo; and &ldquo;non-resident&rdquo;
+keys. &ldquo;Resident&rdquo; means that the key is effectively retrievable from the
+token (it doesn&rsquo;t actually get the key - it&rsquo;s a handle that lets one use the
+hardware key on the device).</p>
+
+<p>This got me thinking about how I could use a single token (with two keys) to
+access the various machines I use.</p>
+
+<p>In my use case, I have two types of machines I want to connect to:</p>
+
+<ul>
+<li><strong>greater security:</strong> machines I want to grant access to from a very select
+number of devices.</li>
+</ul>
+
+<p>The <code>greater</code> key will require me to copy the &ldquo;key handle&rdquo; to the machines I
+want to use it from.</p>
+
+<ul>
+<li><strong>lesser security:</strong> machines I want to access from devices that may not be as
+secure.</li>
+</ul>
+
+<p>The <code>lesser</code> key will be &ldquo;resident&rdquo; to the YubiKey. This means it can be
+downloaded from the YubiKey itself. Because of this, it should be trusted a
+bit less.</p>
+
+<p><a id="org3b8793a"></a></p>
+
+<h1>Creating keys</h1>
+
+<p>When creating FIDO keys (really they are key handles) one needs to explicitly
+tell the tool being used that it needs to pick the next slot. Otherwise
+generating the second key will clobber the first!</p>
+
+<p><a id="orgbc1a8c9"></a></p>
+
+<h2>Generating the non-resident handle</h2>
+
+<p><code>greater</code> will require me to send the <code>~/.ssh/ed25519_sk_greater</code> handle to the
+various hosts I want to use it from.</p>
+
+<p>We will be using <code>ssh-keygen</code> to create our resident key.</p>
+
+<pre><code>ssh-keygen -t ed25519-sk -Oapplication=ssh:greater -f ~/.ssh/ed25519_sk_greater
+</code></pre>
+
+<p><a id="org05f4053"></a></p>
+
+<h2>Generating the resident handle</h2>
+
+<p>Because resident keys allow for the handle to be downloaded from the token,
+I have changed the PIN on my token. The PIN is the only defense against a
+stolen key. <strong>Note</strong>: the PIN can be a full passphrase!</p>
+
+<p>Again via <code>ssh-keygen</code>.</p>
+
+<pre><code>ssh-keygen -t ed25519-sk -Oresident -Oapplication=ssh:lesser -f ~/.ssh/ed25519_sk_lesser
+</code></pre>
+
+<p><a id="org2df8b52"></a></p>
+
+<h1>Using the token</h1>
+
+<p><a id="org4f9e2ec"></a></p>
+
+<h2>Resident</h2>
+
+<p>The resident key can be used by adding it to <code>ssh-agent</code> or by downloading
+the handle / public key using <code>ssh-keygen</code>:</p>
+
+<p><a id="orgd43612b"></a></p>
+
+<h3>Transient usage with ssh-add</h3>
+
+<pre><code>ssh-add -K
+</code></pre>
+
+<p>This will prompt for the PIN (which should be set as it&rsquo;s the only defense
+against a stolen key!)</p>
+
+<p>No handle files will be placed on the machine you run this on. Handy for
+machines you want to ssh from but don&rsquo;t fully trust.</p>
+
+<p><a id="org42b60c7"></a></p>
+
+<h3>Permanent usage with ssh-agent</h3>
+
+<pre><code>ssh-keygen -K
+</code></pre>
+
+<p>This will also prompt for the PIN, however, it will create the private key
+handle and corresponding public key and place them in <code>$CWD</code>.</p>
+
+<p><a id="org819b5f5"></a></p>
+
+<h2>Non-resident</h2>
+
+<p>The non-resident key will only work from hosts that have the handle (in our case
+<code>~/.ssh/ed25519_sk_greater</code>). As such, the handle must be copied to the machines
+you want to allow access from.</p>
+
+<p>Once the handle is in place, you can specify it&rsquo;s usage in <code>~/.ssh/config</code>:</p>
+
+<pre><code>Host secretsauce
+    IdentityFile ~/.ssh/ed25519_sk_greater
+</code></pre>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated using <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a> and <a href="https://github.com/qbit/deftly/"><i>these</i></a> files.
+      <div id="attrib">
+	      PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / <a href="https://deftly.net/pubkey.asc">3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE</a>
+      </div>
+    </div>
+  </body>
+</html>
+
+
