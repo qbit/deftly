@@ -21,3 +21,4 @@ SHA256 (posts/2018-10-15-openbsd-on-lenovo-a485.html) = 266065b11194762967070d3b
 SHA256 (posts/2018-node-pre-release.html) = 747eb83750d35e47bde45b234212770d3b46685f6f54bcc625a709cdb4da8433
 SHA256 (posts/2019-10-23-websockets-with-relayd.html) = 4ce867ce21b858e58ca8088b758afd129f8689ee38134a4cf686ccd43e1f2aa9
 SHA256 (posts/2020-06-04-openssh-fido2-resident-keys.html) = 36de60d2c4f5c8ad8a791afc94a94fa6c6ccc8935c0d2041fe42810b0792145c
+SHA256 (posts/2020-07-31-ssh-askpass-prompt-for-fido.html) = d36069b998dbc70d4d64ab43760a5eb36fcbe8240c220132f48980760b0bdc70

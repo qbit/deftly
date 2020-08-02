@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+     
+     
+    <title>Deftly.net - Unlocking SSH FIDO keys on device connect.</title>
+     
+    <link rel="stylesheet" type="text/css" href="/css/default.css" />
+    <link rel="stylesheet" type="text/css" href="/css/layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/syntax.css" />
+  </head>
+  <body>
+    <div id="header">
+      <div id="navigation">
+        <h1>Notes</h1>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/archive.html">Archive</a>
+        <hr />
+        <a href="https://github.com/qbit"><img src="/images/GitHub-Mark-64px.png" />GitHub</a>
+        <a href="https://www.linkedin.com/in/abieber/en"><img src="/images/linked_in.png" />LinkedIn</a>
+        <a href="https://twitter.com/qb1t"><img src="/images/twitter.png" /> Twitter</a>
+        <a href="https://cobug.org"><img src="/images/cobsd_trimmed.png" alt="CoBUG.org"/></a>
+
+      </div>
+
+
+    <div id="content">
+      <h1>Unlocking SSH FIDO keys on device connect.</h1>
+<i>Tired of typing &#39;ssh-add -K&#39;? Me too!</i>
+<div class="info">
+    Posted on Fri, 31 Jul 2020 17:43:38 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenSSH YubiKey OpenBSD</div>
+</div>
+
+<h1>The problem</h1>
+
+<p>As a lazy type, I often find it trying to type &ldquo;ssh-add -K&rdquo; over and over. I
+even felt depleted typing it here!</p>
+
+<p>Fortunately for me, OpenBSD makes it trivial to resolve this issue. All we need
+is:</p>
+
+<ul>
+<li><a href="https://man.openbsd.org/hotplugd">hotplugd</a></li>
+<li><a href="https://man.openbsd.org/pkill">pkill</a></li>
+<li>Some shell foo.</li>
+</ul>
+
+<h2>The adder</h2>
+
+<p>This script will run our &hellip;hnnn<code>ssh-add -K</code>.. command:</p>
+
+<pre><code>#!/bin/sh
+
+trap 'ssh-add -K' USR1
+
+while true; do
+	sleep 1;
+done
+</code></pre>
+
+<p>Notice the <code>trap</code> line there? More on that later! This script should be called
+via <code>/usr/local/bin/fido &amp;</code> from <code>~/.xsession</code> or similar. The important thing
+is that it runs <em>after</em> you log in.</p>
+
+<h2>The watcher</h2>
+
+<p><code>hotplugd</code> (in OpenBSD base) does things when stuff happens. That&rsquo;s just what we
+need!</p>
+
+<p>This script (<code>/etc/hotplugd/attach</code>) will be called every time we attach a
+device:</p>
+
+<pre><code>#!/bin/sh
+
+DEVCLASS=$1
+DEVNAME=$2
+
+case &quot;$DEVNAME&quot; in
+	fido0)
+		pkill -USR1 -xf &quot;/bin/sh /usr/local/bin/fido&quot;
+	;;
+esac
+</code></pre>
+
+<p>Notice that <code>pkill</code> command with <code>USR1</code>? That&rsquo;s the magic that hits our <code>trap</code>
+line in the adder script!</p>
+
+<p>Now enable / start up hotplugd:</p>
+
+<pre><code># rcctl enable hotplugd
+# rcctl start hotplugd
+</code></pre>
+
+<h2>That&rsquo;s it!</h2>
+
+<p>If you have all these bits in place, you should see <code>ssh-askpass</code> pop up when
+you connect a FIDO key to your machine!</p>
+
+<p>Here is a video of it in action:</p>
+
+<video width="620" controls>
+  <source src="/fido-add.mp4" type="video/mp4">
+  <p>Your browser doesn't support HTML5 video. Here is
+     a <a href="myVideo.mp4">link to the video</a> instead.</p>
+</video>
+
+<p>Thanks to kn@ for the <code>USR1</code> suggestion! It really helped me be more lazy!</p>
+
+
+    </div>
+    <div id="footer">
+      <hr>
+      Subscribe via <a href="https://deftly.net/rss.xml">RSS</a> / <a href="https://deftly.net/atom.xml">Atom</a> | Generated using <a href="https://code.bolddaemon.com/qbit/boring"><i>boring</i></a> and <a href="https://github.com/qbit/deftly/"><i>these</i></a> files.
+      <div id="attrib">
+	      PGP: <a href="https://pgp.mit.edu/pks/lookup?op=get&search=0x1F81112D62A9ADCE">0x1F81112D62A9ADCE</a> / <a href="https://deftly.net/pubkey.asc">3586 3350 BFEA C101 DB1A  4AF0 1F81 112D 62A9 ADCE</a>
+      </div>
+    </div>
+  </body>
+</html>
+
+
