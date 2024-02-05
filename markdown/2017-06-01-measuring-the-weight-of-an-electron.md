@@ -9,7 +9,7 @@ mean what it takes to make
 [Electron](https://github.com/electron/electron) work on OpenBSD.
 
 *This is a long rant. A rant intended to document lunacy,
- hopefully aid others in the future and make myself fell better about
+ hopefully aid others in the future and make myself feel better about
  something I think is crazy. It may seem like I am making an enemy of electron,
  but keep in mind that isn't my intention! The enemy here, is complexity!*
 
