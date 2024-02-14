@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
      
      
-    <title>Deftly.net - Test packages for Node on OpenBSD</title>
+    <title>Deftly.net - Updating a Rust port on OpenBSD</title>
      
     <link rel="stylesheet" type="text/css" href="/css/default.css" />
     <link rel="stylesheet" type="text/css" href="/css/layout.css" />
@@ -29,31 +29,41 @@
 
 
     <div id="content">
-      <h1>Test packages for Node on OpenBSD</h1>
-<i>Have your nodes and eat them too!</i>
+      <h1>Updating a Rust port on OpenBSD</h1>
+<i>make sumwhat?!</i>
 <div class="info">
-    Posted on Thu, 30 Aug 2018 09:00:00 MDT by Aaron Bieber
-    <div class="tags">Tags: OpenBSD, Node.js</div>
+    Posted on Sat, 09 Sep 2023 07:43:38 MDT by Aaron Bieber
+    <div class="tags">Tags: OpenBSD Rust Ports</div>
 </div>
 
-<h1>Test builds for node</h1>
+<h1>Updating a Rust port</h1>
 
-<p>In an attempt to get a wider range of testing for <code>lang/node</code>, I have decided
-to make test builds available here on <a href="https://deftly.net/pub/OpenBSD">deftly.net</a>.</p>
+<p>OpenBSD rust ports have always been a bit tricky for me to update. Remembering the steps is a pain
+and there isn&rsquo;t a clear &ldquo;path&rdquo; in the docs.</p>
 
-<p>If you want to test node, but don&rsquo;t want to build the package yourself, you
-can simply run the following to upgrade your current install:</p>
+<p>Recently someone asked me for some guidance on how to do an update.. and while writing out the steps
+I got frustrated and finally put things into a script.</p>
 
-<pre><code>env PKG_PATH=https://deftly.net/pub/OpenBSD/snapshots/packages/$(machine) pkg_add -u node
-</code></pre>
+<p>Here is a error-check-less approach to updating a rust port:</p>
 
-<p>All the packages pushed here will be signed via <a href="https://man.openbsd.org/signify">signify(1)</a>.</p>
+<pre><code class="language-shell">#!/bin/sh
 
-<p>To make use of the signing, you will have to copy the below pub key to
-<code>/etc/signify/abieber-pkg.pub</code></p>
+set -eu
 
-<pre><code>untrusted comment: signify public key
-RWRaFou/737fpovRq3OP3lZnz/97lbq2wYXFFk90nYUaW8xbc2HTd2xj
+PORT=&quot;$(make show=PKGNAME)&quot;
+
+mv -v crates.inc crates.old
+touch crates.inc
+make makesum
+make modcargo-gen-crates &gt; /tmp/${PORT}.crates.inc
+grep ^MODCARGO /tmp/${PORT}.crates.inc &gt; crates.inc
+make clean
+make makesum
+make modcargo-gen-crates-licenses &gt; /tmp/${PORT}.license.inc
+grep ^MODCARGO /tmp/${PORT}.license.inc &gt; crates.inc
+rm crates.old
+make clean
+make &amp;&amp; make package
 </code></pre>
 
 
